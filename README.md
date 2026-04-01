@@ -29,7 +29,8 @@
 
 ## Documents
 
-- [communication-permission-matrix-v0.1](D:\vibe-somnium\docs\protocol\communication-permission-matrix-v0.1.md)
+- [communication-permission-matrix-v0.1](docs/protocol/communication-permission-matrix-v0.1.md)
+- [agent-constraint-matrix-v0.1](docs/protocol/agent-constraint-matrix-v0.1.md)
 
 ## Working Principles
 
@@ -42,7 +43,11 @@
 ## Near-Term Roadmap
 
 1. Finalize the first communication and permission matrix
-2. Define the A2A message envelope and per-agent message allowlists
-3. Define scene loop and dramatic-window scheduling
+2. Expand the matrix into agent-by-constraint implementation tables
+3. Define the A2A message envelope and per-agent message allowlists
 4. Define public ledger, private memory, and canon stores
 5. Prototype a minimal scene runner
+
+## License
+
+MIT. See [LICENSE](LICENSE).
