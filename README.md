@@ -1,0 +1,48 @@
+# vibe-somnium / 织梦
+
+`vibe-somnium` is a docs-first project for a literary multi-agent system built around A2A communication, hard authority boundaries, and stable world logic.
+
+中文名是 `织梦`。这个项目的核心判断是：现在很多 direct AI writing 的问题，不只是 prose 不够好，而是 authorial power 过于集中，导致世界、人物、冲突都会被当前 prompt 临时改写，最后产出的是可变形文本，不是稳定生长的 fiction。
+
+## Core Premise
+
+我们不把 AI 当成一个万能作者，而是把创作拆成多个拥有有限权限的 agents：
+
+- `character agent`: owns will, motive, subjectivity
+- `world agent`: owns consequence, causality, state transition
+- `plot agent`: owns pressure, tension, structural conflict
+- `narrator agent`: owns prose, voice, rendering
+- `canon steward`: owns canon mutation review
+- `orchestrator`: owns routing, validation, scene scheduling
+
+这套系统追求的不是 deterministic production of literature，而是构造一种让文学更可能发生的条件：stable world, bounded authority, local knowledge, accumulating tension。
+
+## Current Focus
+
+当前阶段先不做 product，不急着做 UI，也不先做 full implementation。先把 protocol 和约束体系定义清楚：
+
+- communication constraints
+- permission constraints
+- event bus validation behavior
+- scene execution cadence
+- canon mutation policy
+
+## Documents
+
+- [communication-permission-matrix-v0.1](D:\vibe-somnium\docs\protocol\communication-permission-matrix-v0.1.md)
+
+## Working Principles
+
+- `soft validation, hard permission`
+- `private cognition, public consequence`
+- `plot provides pressure, not destiny`
+- `narrator cannot invent facts`
+- `character decides intent, world decides consequence`
+
+## Near-Term Roadmap
+
+1. Finalize the first communication and permission matrix
+2. Define the A2A message envelope and per-agent message allowlists
+3. Define scene loop and dramatic-window scheduling
+4. Define public ledger, private memory, and canon stores
+5. Prototype a minimal scene runner
