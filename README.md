@@ -50,4 +50,10 @@
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+This repository uses a mixed-license structure.
+
+- Code and other non-documentation repository contents are licensed under Apache-2.0.
+- Documentation and protocol text, including `README.md` and all files under `docs/`, are licensed under CC BY 4.0.
+- Attribution and origin context are summarized in `NOTICE`.
+
+See [LICENSE](LICENSE), [LICENSE-docs](LICENSE-docs), and [NOTICE](NOTICE).
