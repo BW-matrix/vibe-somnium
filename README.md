@@ -35,6 +35,7 @@ Working title / codename: `vibe-somnium / 织梦`
 - [agent-constraint-matrix-v0.1](docs/protocol/agent-constraint-matrix-v0.1.md)
 - [dialogue-window-schema-v0.1](docs/protocol/dialogue-window-schema-v0.1.md)
 - [state-and-knowledge-layers-v0.1](docs/protocol/state-and-knowledge-layers-v0.1.md)
+- [terminology-index-v0.1](docs/reference/terminology-index-v0.1.md)
 
 ## Working Principles
 
@@ -52,6 +53,10 @@ Working title / codename: `vibe-somnium / 织梦`
 4. Define the `ScenePacket` payload shape and commit semantics
 5. Define `world_state_ledger`, `public_event_ledger`, `private_memory`, and canon stores
 6. Prototype a minimal scene runner
+
+## Reference
+
+- The canonical vocabulary directory lives in `docs/reference/`.
 
 ## License
 
