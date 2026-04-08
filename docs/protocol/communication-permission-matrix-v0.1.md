@@ -23,7 +23,7 @@ This document is the first protocol draft for `vibe-somnium / 织梦`.
 | Allowed outbound message types | `Intent`, `ActionProposal`, `DialogueWindow`, `SelfNote` | `Observation`, `Resolution`, `StateDelta`, `CanonQuery`, `CanonMutationRequest` | `Pressure`, `EscalationSeed`, `ScenePressurePacket` | `Narration`, `SceneDraft`, `StyleNote` | `CanonDecision`, `CanonDelta`, `CanonClarification` | `Warning`, `RepairRequest`, `RouteNotice`, `ScenePacket`, `QuarantineNotice` |
 | Allowed inbound message types | `Observation`, public `Pressure`, `Warning`, visible `ScenePacket` | `Intent`, `ActionProposal`, `DialogueWindow`, `CanonDecision`, `Warning` | public `ScenePacket`, global progress summaries, `Warning` | committed `ScenePacket`, approved style guide, `Warning` | `CanonQuery`, `CanonMutationRequest`, `Warning` | all message envelopes and validation metadata |
 | Default visibility | `private_self` for raw cognition; `private_target` for proposals to world | `system_restricted` by default; public only through committed state | `scene_public` or `system_restricted` depending on pressure type | `system_restricted` until prose is committed | `system_restricted` | `system_restricted` |
-| Read scope | Self biography, self memory, public canon, visible scene facts | World state, canon, submitted proposals, rulesets | Global structure progress, public ledger, relationship map | Committed scene packet, authorized POV material, style guide | Full canon layers and canon change log | Envelope metadata, policy tables, validation rules |
+| Read scope | Self biography, self memory, public canon, visible scene facts, public event ledger | World state ledger, public event ledger, canon, submitted proposals, rulesets | Global structure progress, public event ledger, relationship map, limited world-state summaries | Committed scene packet, authorized POV material, style guide | Full canon layers and canon change log, canon-relevant state | Envelope metadata, policy tables, validation rules |
 | Private memory access | Full self memory only | No direct access to character raw memory | No direct access to character raw memory | Limited POV-scoped access only when authorized | Canon memory only | No literary private memory by default |
 | Proposal scope | What I want, what I do, what I say, how I frame myself | What happens, what changes, what becomes visible | What pressure enters the scene | How committed events become prose | Whether a new fact enters canon | How messages move and whether they need repair |
 | Commit scope | None on objective world state | May commit `Resolution` and `StateDelta` within current rules | None on factual story state | May commit manuscript text only, not facts | May commit `Emergent Canon` only | May commit routing results, validation outcomes, and scene packets |
@@ -118,6 +118,8 @@ Suggested critical triggers:
 | `Immutable Canon` | Fundamental world law, hard history anchors, core role definitions | No routine agent |
 | `Latent Canon` | Already true but not yet revealed facts | Not changed during scene play; only revealed when valid |
 | `Emergent Canon` | New facts allowed to grow during writing | `Canon Steward` after review |
+
+For the complementary storage model covering `world_state_ledger`, `public_event_ledger`, and `private_memory`, see [state-and-knowledge-layers-v0.1](state-and-knowledge-layers-v0.1.md).
 
 ## Commit Rule
 

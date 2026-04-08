@@ -38,14 +38,16 @@ The goal is not to freeze every detail right now, but to create a stable matrix 
 | Constraint | Character Agent | World Agent | Plot Agent | Narrator Agent | Canon Steward | Orchestrator |
 | --- | --- | --- | --- | --- | --- | --- |
 | Core authority | will, motive, choice, self-interpretation | consequence, causality, state transition | pressure, tension, structural escalation | prose, voice, rendering | canon review and canon mutation approval | routing, validation, scheduling |
-| May read public ledger | allow | allow | allow | limited, committed packets only | allow | limited, metadata and route state only |
+| May read public event ledger | allow | allow | allow | limited, committed packets only | allow | limited, metadata and route state only |
+| May read world state ledger | no direct access | allow | limited, summary only | no direct access | limited, canon-relevant access | limited, route-relevant access only |
 | May read current scene state | limited, visible facts only | allow | limited, summarized or structure-relevant view | limited, committed packet only | limited, canon-relevant slice only | limited, routing-relevant metadata only |
 | May read public canon | allow | allow | allow | limited, only what render needs | allow | limited, policy summary only |
 | May read latent canon | no | limited, only resolution-relevant parts | limited, only structure-relevant parts | no | allow | no by default |
 | May read own private memory | allow | no | no | no | no | no |
 | May read others' private memory | no | no raw access; only transformed proposals | no | limited, only explicit POV-authorized material | no | no |
 | May write own private memory | allow | no | no | no | no | no |
-| May write public ledger | indirect only | allow, through committed `Resolution` and `StateDelta` | no | no | no | allow, validation metadata and `ScenePacket` only |
+| May write public event ledger | indirect only | allow, after visibility conditions are met | no | no | no | allow, validation metadata and `ScenePacket` references only |
+| May write world state ledger | no | allow, through committed `Resolution` and `StateDelta` | no | no | no | no |
 | May commit world state | no | allow | no | no | no | no |
 | May commit manuscript text | no | no | no | allow | no | no |
 | May commit canon | no | no direct canon write | no | no | allow, `Emergent Canon` only | no |
@@ -107,6 +109,6 @@ No other agent should be able to solve a scene problem by silently creating lore
 
 1. Per-agent message allowlist at field level
 2. `ScenePacket` payload shape
-3. public ledger vs private memory store boundaries
+3. memory delta format for `private_memory`
 4. canon mutation review checklist
 5. dialogue-specific evaluation metrics
