@@ -34,6 +34,7 @@ Working title / codename: `vibe-somnium / 织梦`
 - [communication-permission-matrix-v0.1](docs/protocol/communication-permission-matrix-v0.1.md)
 - [agent-constraint-matrix-v0.1](docs/protocol/agent-constraint-matrix-v0.1.md)
 - [dialogue-window-schema-v0.1](docs/protocol/dialogue-window-schema-v0.1.md)
+- [scene-packet-schema-v0.1](docs/protocol/scene-packet-schema-v0.1.md)
 - [state-and-knowledge-layers-v0.1](docs/protocol/state-and-knowledge-layers-v0.1.md)
 - [terminology-index-v0.1](docs/reference/terminology-index-v0.1.md)
 
@@ -47,12 +48,12 @@ Working title / codename: `vibe-somnium / 织梦`
 
 ## Near-Term Roadmap
 
-1. Finalize the first communication and permission matrix
-2. Expand the matrix into agent-by-constraint implementation tables
-3. Define the `DialogueWindow` payload shape
-4. Define the `ScenePacket` payload shape and commit semantics
-5. Define `world_state_ledger`, `public_event_ledger`, `private_memory`, and canon stores
-6. Prototype a minimal scene runner
+1. Define the memory delta format for `private_memory`
+2. Define the canon mutation review checklist
+3. Refine `ScenePacket` packet-to-memory handoff rules
+4. Align new packet and memory terms with the terminology index
+5. Define dialogue-specific evaluation metrics
+6. Prototype a minimal scene runner after the protocol core stabilizes
 
 ## Reference
 
