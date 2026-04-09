@@ -121,6 +121,7 @@ docs/
 │   ├── agent-constraint-matrix-v0.1.md           # 实现级：constraint × agent 展开表
 │   ├── dialogue-window-schema-v0.1.md            # DialogueWindow payload 定义 + JSON 示例
 │   ├── scene-packet-schema-v0.1.md               # ScenePacket payload shape + commit semantics + narration bounds
+│   ├── memory-delta-format-v0.1.md               # MemoryDelta shape + writer rules + revision lineage
 │   └── state-and-knowledge-layers-v0.1.md        # 五层存储模型 + access matrix + promotion rules
 └── reference/
     └── terminology-index-v0.1.md                 # 规范术语表（80+ terms）
@@ -142,10 +143,11 @@ All documents are **v0.1** — stable enough to build on, open for refinement.
 | 4 | State & Knowledge Layers | ✅ done | `state-and-knowledge-layers-v0.1.md` |
 | 5 | Terminology Index | ✅ done | `terminology-index-v0.1.md` |
 | 6 | **ScenePacket schema** | ✅ done | `scene-packet-schema-v0.1.md` |
-| 7 | **Memory delta format** | 🔲 next | `private_memory` 的增量更新格式 |
+| 7 | **Memory delta format** | ✅ done | `memory-delta-format-v0.1.md` |
 | 8 | **Canon mutation review checklist** | 🔲 next | Canon Steward 审查新 canon 的标准流程 |
-| 9 | **Dialogue evaluation metrics** | 🔲 planned | 对话质量评估框架 |
-| 10 | **Minimal scene runner prototype** | 🔲 planned | 最小可运行原型 |
+| 9 | **Event publication thresholds** | 🔲 next | `public_event_ledger` 的发布阈值与升级规则 |
+| 10 | **Dialogue evaluation metrics** | 🔲 planned | 对话质量评估框架 |
+| 11 | **Minimal scene runner prototype** | 🔲 planned | 最小可运行原型 |
 
 ---
 

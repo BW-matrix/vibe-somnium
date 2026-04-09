@@ -35,6 +35,7 @@ Working title / codename: `vibe-somnium / 织梦`
 - [agent-constraint-matrix-v0.1](docs/protocol/agent-constraint-matrix-v0.1.md)
 - [dialogue-window-schema-v0.1](docs/protocol/dialogue-window-schema-v0.1.md)
 - [scene-packet-schema-v0.1](docs/protocol/scene-packet-schema-v0.1.md)
+- [memory-delta-format-v0.1](docs/protocol/memory-delta-format-v0.1.md)
 - [state-and-knowledge-layers-v0.1](docs/protocol/state-and-knowledge-layers-v0.1.md)
 - [terminology-index-v0.1](docs/reference/terminology-index-v0.1.md)
 
@@ -48,8 +49,8 @@ Working title / codename: `vibe-somnium / 织梦`
 
 ## Near-Term Roadmap
 
-1. Define the memory delta format for `private_memory`
-2. Define the canon mutation review checklist
+1. Define the canon mutation review checklist
+2. Define event publication thresholds for `public_event_ledger`
 3. Refine `ScenePacket` packet-to-memory handoff rules
 4. Align new packet and memory terms with the terminology index
 5. Define dialogue-specific evaluation metrics
