@@ -219,7 +219,7 @@ Avoid using plain `public ledger` unless the context clearly means the public ev
 
 ## Immediate Follow-Ups
 
-1. define event publication thresholds for `public_event_ledger`
-2. define reveal rules between `latent_canon` and `public_canon`
-3. refine `ScenePacket` packet-to-memory handoff rules
-4. align canon review outcomes with storage-layer propagation
+1. define reveal rules between `latent_canon` and `public_canon`
+2. refine `ScenePacket` packet-to-memory handoff rules
+3. align canon review and publication outcomes with storage-layer propagation
+4. dialogue evaluation metrics

@@ -123,6 +123,7 @@ docs/
 │   ├── scene-packet-schema-v0.1.md               # ScenePacket payload shape + commit semantics + narration bounds
 │   ├── memory-delta-format-v0.1.md               # MemoryDelta shape + writer rules + revision lineage
 │   ├── canon-mutation-review-checklist-v0.1.md   # CanonMutationRequest 审查流程 + decision outcomes + commit semantics
+│   ├── event-publication-thresholds-v0.1.md      # public_event_ledger 的发布阈值 + publication scope + contestability
 │   └── state-and-knowledge-layers-v0.1.md        # 五层存储模型 + access matrix + promotion rules
 └── reference/
     └── terminology-index-v0.1.md                 # 规范术语表（80+ terms）
@@ -146,10 +147,11 @@ All documents are **v0.1** — stable enough to build on, open for refinement.
 | 6 | **ScenePacket schema** | ✅ done | `scene-packet-schema-v0.1.md` |
 | 7 | **Memory delta format** | ✅ done | `memory-delta-format-v0.1.md` |
 | 8 | **Canon mutation review checklist** | ✅ done | `canon-mutation-review-checklist-v0.1.md` |
-| 9 | **Event publication thresholds** | 🔲 next | `public_event_ledger` 的发布阈值与升级规则 |
+| 9 | **Event publication thresholds** | ✅ done | `event-publication-thresholds-v0.1.md` |
 | 10 | **ScenePacket-to-memory handoff rules** | 🔲 next | 场景包如何稳定地派生记忆增量 |
-| 11 | **Dialogue evaluation metrics** | 🔲 planned | 对话质量评估框架 |
-| 12 | **Minimal scene runner prototype** | 🔲 planned | 最小可运行原型 |
+| 11 | **Latent-to-public canon reveal rules** | 🔲 next | 潜藏设定何时合法提升为公开设定 |
+| 12 | **Dialogue evaluation metrics** | 🔲 planned | 对话质量评估框架 |
+| 13 | **Minimal scene runner prototype** | 🔲 planned | 最小可运行原型 |
 
 ---
 

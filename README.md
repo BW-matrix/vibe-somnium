@@ -37,6 +37,7 @@ Working title / codename: `vibe-somnium / 织梦`
 - [scene-packet-schema-v0.1](docs/protocol/scene-packet-schema-v0.1.md)
 - [memory-delta-format-v0.1](docs/protocol/memory-delta-format-v0.1.md)
 - [canon-mutation-review-checklist-v0.1](docs/protocol/canon-mutation-review-checklist-v0.1.md)
+- [event-publication-thresholds-v0.1](docs/protocol/event-publication-thresholds-v0.1.md)
 - [state-and-knowledge-layers-v0.1](docs/protocol/state-and-knowledge-layers-v0.1.md)
 - [terminology-index-v0.1](docs/reference/terminology-index-v0.1.md)
 
@@ -50,9 +51,9 @@ Working title / codename: `vibe-somnium / 织梦`
 
 ## Near-Term Roadmap
 
-1. Define event publication thresholds for `public_event_ledger`
-2. Refine `ScenePacket` packet-to-memory handoff rules
-3. Align new packet, memory, and canon terms with the terminology index
+1. Refine `ScenePacket` packet-to-memory handoff rules
+2. Define reveal rules between `latent_canon` and `public_canon`
+3. Align new packet, memory, canon, and publication terms with the terminology index
 4. Define dialogue-specific evaluation metrics
 5. Prototype a minimal scene runner after the protocol core stabilizes
 
