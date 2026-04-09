@@ -213,6 +213,6 @@ This document should be read together with:
 
 Next protocol priority after this document:
 
-1. refine `ScenePacket` packet-to-memory handoff rules
-2. define reveal rules between `latent_canon` and `public_canon`
+1. define reveal rules between `latent_canon` and `public_canon`
+2. align publication and handoff terms with the terminology index
 3. dialogue evaluation metrics

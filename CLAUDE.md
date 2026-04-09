@@ -124,6 +124,7 @@ docs/
 │   ├── memory-delta-format-v0.1.md               # MemoryDelta shape + writer rules + revision lineage
 │   ├── canon-mutation-review-checklist-v0.1.md   # CanonMutationRequest 审查流程 + decision outcomes + commit semantics
 │   ├── event-publication-thresholds-v0.1.md      # public_event_ledger 的发布阈值 + publication scope + contestability
+│   ├── scene-packet-to-memory-handoff-v0.1.md    # ScenePacket 到 MemoryDelta 的 owner-specific 派生规则
 │   └── state-and-knowledge-layers-v0.1.md        # 五层存储模型 + access matrix + promotion rules
 └── reference/
     └── terminology-index-v0.1.md                 # 规范术语表（80+ terms）
@@ -148,7 +149,7 @@ All documents are **v0.1** — stable enough to build on, open for refinement.
 | 7 | **Memory delta format** | ✅ done | `memory-delta-format-v0.1.md` |
 | 8 | **Canon mutation review checklist** | ✅ done | `canon-mutation-review-checklist-v0.1.md` |
 | 9 | **Event publication thresholds** | ✅ done | `event-publication-thresholds-v0.1.md` |
-| 10 | **ScenePacket-to-memory handoff rules** | 🔲 next | 场景包如何稳定地派生记忆增量 |
+| 10 | **ScenePacket-to-memory handoff rules** | ✅ done | `scene-packet-to-memory-handoff-v0.1.md` |
 | 11 | **Latent-to-public canon reveal rules** | 🔲 next | 潜藏设定何时合法提升为公开设定 |
 | 12 | **Dialogue evaluation metrics** | 🔲 planned | 对话质量评估框架 |
 | 13 | **Minimal scene runner prototype** | 🔲 planned | 最小可运行原型 |
@@ -162,7 +163,7 @@ All documents are **v0.1** — stable enough to build on, open for refinement.
 3. How much of private cognition may be selectively exposed to narrator in close POV modes
 4. How scene packets should be summarized for long-form memory retention
 5. Whether world resolution should be deterministic, probabilistic, or hybrid
-6. Event publication thresholds for `public_event_ledger`
+6. How `public_event_ledger` entries should interact with owner memory after later encounter
 7. Reveal rules between `latent_canon` and `public_canon`
 
 ---
@@ -231,4 +232,4 @@ Missing fields should trigger soft recovery (warn, normalize, repair), not hard 
 
 ---
 
-*Last updated: 2026-04-09*
+*Last updated: 2026-04-10*
