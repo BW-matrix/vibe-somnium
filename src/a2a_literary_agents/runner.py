@@ -10,6 +10,7 @@ from .config import RunnerConfig
 from .interface import normalize_dialogue_window, normalize_plot_packet, normalize_world_bundle
 from .json_util import load_json_file, write_json_file
 from .llm import AgentProvider, build_provider
+from .path_safety import is_safe_path_id, resolve_run_directory
 from .projection import (
     canon_review_context,
     character_context,
@@ -27,15 +28,29 @@ from .validation import has_block, final_decision, validate_dialogue, validate_j
 
 def run_trace(fixture_path: str, out_dir: str, config: RunnerConfig) -> dict[str, Any]:
     fixture = load_json_file(fixture_path)
-    provider = build_provider(config)
+    runtime_mode = fixture.get("runtime_mode")
+    if runtime_mode == "world_driven":
+        from .world_runtime import run_world_trace
+
+        return run_world_trace(fixture_path, out_dir, config)
+    if runtime_mode != "legacy_window_v0.1":
+        raise ValueError(
+            "Fixture runtime_mode must be explicitly `world_driven` or "
+            "`legacy_window_v0.1`; missing or unknown values never fall back."
+        )
+
     trace_id = fixture["trace_id"]
+    if not is_safe_path_id(trace_id):
+        raise ValueError("Fixture trace_id must be a safe protocol identifier.")
+    provider = build_provider(config)
     created_at = datetime.now(timezone.utc).isoformat()
     run_id = _run_id(created_at)
-    run_dir = os.path.join(out_dir, trace_id, run_id)
+    run_dir = resolve_run_directory(out_dir, trace_id, run_id)
     os.makedirs(run_dir, exist_ok=True)
 
     trace: dict[str, Any] = {
         "trace_id": trace_id,
+        "runtime_mode": runtime_mode,
         "run_id": run_id,
         "fixture_path": fixture_path,
         "created_at": created_at,

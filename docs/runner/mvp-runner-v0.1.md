@@ -1,6 +1,6 @@
 # MVP Trace Runner v0.1
 
-This document describes the first minimal runnable prototype for `a2a-literary-agents`.
+This document describes the legacy compatibility prototype for `a2a-literary-agents`. New fixtures must use the primary [World-Driven MVP Runner v0.2](world-driven-mvp-v0.2.md); runtime selection is explicit and never falls back to this profile.
 
 The runner is not a full autonomous literary swarm. It is a single-window protocol trace runner that executes allowed and adversarial scene fixtures through the current protocol objects.
 
@@ -84,7 +84,7 @@ Isolation rules:
 One-time isolated login:
 
 ```powershell
-$env:A2A_CODEX_HOME="D:\vibe-somnium\.local\codex-cli-home"
+$env:A2A_CODEX_HOME = Join-Path $PWD ".local\codex-cli-home"
 $env:CODEX_HOME=$env:A2A_CODEX_HOME
 codex login
 ```
@@ -92,8 +92,8 @@ codex login
 Run with Codex CLI:
 
 ```powershell
-$env:A2A_CODEX_HOME="D:\vibe-somnium\.local\codex-cli-home"
-$env:A2A_CODEX_WORKDIR="D:\vibe-somnium\.local\codex-cli-workdir"
+$env:A2A_CODEX_HOME = Join-Path $PWD ".local\codex-cli-home"
+$env:A2A_CODEX_WORKDIR = Join-Path $PWD ".local\codex-cli-workdir"
 $env:A2A_LLM_MODEL="gpt-5.5"
 python scripts/run_trace.py run --fixture fixtures/traces/allowed_archive_probe.json --llm-mode codex-cli
 ```
@@ -141,20 +141,23 @@ Supported environment variables:
 | `A2A_CODEX_BINARY` | Codex CLI executable, default `codex` |
 | `A2A_CODEX_HOME` | isolated Codex home for `codex-cli` mode |
 | `A2A_CODEX_WORKDIR` | isolated read-only working directory for `codex-cli` mode |
+| `A2A_LLM_TIMEOUT_SECONDS` | per-call wall-time timeout, default `240` for max-reasoning calls |
 
-High-context default output caps:
+Current shared default output caps:
 
 ```json
 {
-  "max_llm_calls_per_trace": 8,
-  "total_output_token_budget": 35000,
+  "max_llm_calls_per_trace": 24,
+  "total_output_token_budget": 300000,
   "per_agent_max_output_tokens": {
-    "plot": 2000,
-    "character": 4000,
-    "world": 5000,
-    "narrator": 6000,
-    "canon_steward": 3000,
-    "judge": 3000
+    "plot": 12000,
+    "character": 16000,
+    "world": 24000,
+    "router": 12000,
+    "authority": 24000,
+    "narrator": 16000,
+    "canon_steward": 16000,
+    "judge": 24000
   }
 }
 ```
@@ -278,4 +281,4 @@ Each normalization is recorded in `interface_normalization`. Missing security-cr
 - Real API mode assumes an OpenAI-compatible `/chat/completions` endpoint.
 - Codex CLI mode is process-based and slower than direct API mode.
 - Token usage is recorded per agent. Direct API and Codex CLI JSON events use returned provider usage when available; otherwise the runner records local estimates.
-- `Orchestrator Projection, Assembly, and Sealing Contract v0.1` should be formalized next.
+- This compatibility path is maintained for regression coverage; authority-hardening work targets the World-driven profile.

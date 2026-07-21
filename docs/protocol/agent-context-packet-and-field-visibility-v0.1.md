@@ -10,6 +10,12 @@ Its central rule is simple:
 - agents receive projected views
 - visibility labels are not security by themselves unless context assembly enforces them
 
+Runtime status:
+
+- this document remains the general projection law
+- [world-driven-runtime-v0.1](world-driven-runtime-v0.1.md) is the normative executable v0.2 profile
+- the executable profile splits the earlier `Orchestrator` umbrella into `Runtime Kernel`, `Router Agent`, and `Authority Judge`
+
 ## Purpose
 
 `AgentContextPacket` exists to solve five protocol problems:
@@ -18,7 +24,7 @@ Its central rule is simple:
 2. define per-agent projected views of `ScenePacket`, `DialogueWindow`, memory, canon, and public events
 3. distinguish recoverable schema fields from security-critical authority fields
 4. make `Narrator Agent` consume `NarratorInputPacket`, not raw system state
-5. give `Orchestrator` a mechanical assembly contract instead of editorial content power
+5. give `Runtime Kernel` a mechanical assembly contract instead of editorial content power
 
 Without this layer, the protocol may say that an agent cannot know a fact while still accidentally placing that fact inside the agent's prompt context.
 
@@ -36,13 +42,16 @@ Context assembly should satisfy these constraints:
 
 | Object | Meaning | Owner | Notes |
 | --- | --- | --- | --- |
-| `AgentContextPacket` | the general per-agent context envelope assembled for one protocol step | `Orchestrator` | not literary content |
-| `ScenePacketView` | a projected slice of a committed `ScenePacket` | `Orchestrator` | recipient-specific |
-| `NarratorInputPacket` | the only legal factual input for narration | `Orchestrator` | derived from committed material only |
-| `CharacterContextPacket` | the context a `Character Agent` may use to form intent or dialogue | `Orchestrator` | owner-specific memory plus visible world |
-| `PlotContextSummary` | the structural view a `Plot Agent` may use to propose pressure | `Orchestrator` | no raw hidden truth |
-| `CanonReviewContext` | the canon-relevant context for `Canon Steward` | `Orchestrator` | may include restricted canon refs |
+| `AgentContextPacket` | the general per-agent context envelope assembled for one protocol step | `Runtime Kernel` | not literary content |
+| `ScenePacketView` | a projected slice of a committed `ScenePacket` | `Runtime Kernel` | recipient-specific |
+| `NarratorInputPacket` | the only legal factual input for narration | `Runtime Kernel` | derived from transaction-accepted, POV-visible material; publication remains atomic |
+| `CharacterContextPacket` | the context a `Character Agent` may use to form intent or dialogue | `Runtime Kernel` | owner-specific memory plus visible world |
+| `PlotContextSummary` | the structural view a `Plot Agent` may use to propose pressure | `Runtime Kernel` | no raw hidden truth |
+| `CanonReviewContext` | the canon-relevant context for `Canon Steward` | `Runtime Kernel` | may include restricted canon refs |
 | `FieldProjection` | a field-level allowlist mapping from source object to recipient view | protocol policy | prevents object-level leakage |
+| `ProjectionContract` | Kernel-held source and policy anchors for one projected context | `Runtime Kernel` | external trust root; never supplied by the manifest or recipient |
+| `ProjectionManifest` | audit record for one projected context | `Runtime Kernel` | must match the separate contract, exact recipient, and delivered context |
+| `ValidatedProjection` | immutable dispatch permit produced only after projection validation | `Runtime Kernel` | seals context, protocol stage, role, instance id, manifest id, and contract id |
 
 ## AgentContextPacket Shape
 
@@ -132,7 +141,7 @@ Important rule:
 Important rule:
 
 - `Narrator Agent` does not render from raw `DialogueWindow`
-- it may only use dialogue material after `World Agent` resolution and `ScenePacket` sealing
+- it may only use dialogue material after `World Agent` resolution and a transaction-safe narration projection; no prose becomes public until final `ScenePacket` sealing
 
 ## Field Projection: ScenePacket
 
@@ -162,6 +171,14 @@ Important rule:
 | `Canon Steward` | canon refs, review request, committed reveal evidence, affected canon history | scene prose drafts unless canon-relevant, irrelevant private memory |
 | `Orchestrator` | route metadata, validation policy, projection policy, source refs | literary content rewriting authority |
 
+In the executable World-driven profile, the legacy `Orchestrator` row is decomposed as follows:
+
+| Executable component | Receives | May do | Must not do |
+| --- | --- | --- | --- |
+| `Runtime Kernel` | system objects, schemas, registries, projection policy | deterministic projection, validation, transaction, sealing, and trace | make semantic or literary judgments |
+| `Router Agent` | one approved `CharacterDecisionRequest` routing view | bind the request to its declared owner and projection policy | summarize story state, retrieve memory, or suggest a choice |
+| `Authority Judge` | a subject-specific audit context | review authority, grounding, visibility, and overreach | rewrite the subject or create replacement story content |
+
 ## Context Compression Policy
 
 Compression is allowed when a context would be too large, but compression is not free narration.
@@ -185,6 +202,74 @@ Any non-mechanical summary should include:
 - `source_refs`
 - `compression_policy`
 - `omitted_categories`
+
+The current executable profile does not permit free-form model compression in `CharacterContextPacket`, `PlotContextSummary`, or `NarratorInputPacket`. If a later profile permits such compression, it must introduce a separately reviewed compression subject rather than silently extending Kernel authority.
+
+## Executable Projection Manifest
+
+Every model-facing context in the World-driven profile has a Kernel-side `ProjectionManifest` sidecar and a separate Kernel-held `ProjectionContract`. The manifest is recorded in the private trace and validated before delivery; neither object is included inside the recipient prompt or public sample. The contract, not the manifest, supplies the trusted policy id, exact `{role, instance_id}` recipient, source paths, source hashes, mapping modes, and immutable source snapshots used during validation. A manifest cannot establish its own authority by changing a source label and recomputing its hashes.
+
+The manifest records:
+
+- `manifest_id`
+- policy id, `projection_type`, and exact `{role, instance_id}` recipient
+- contract id and contract hash
+- SHA-256 of the complete delivered context
+- included and excluded source families
+- one `FieldProjection` for every top-level projected field
+- one leaf-projection record for every recursively delivered terminal value, including empty containers
+
+Each `FieldProjection` records:
+
+- destination field
+- SHA-256 of the delivered field value
+- exact source path
+- SHA-256 of the source value before projection
+- deterministic projection operation
+- mapping mode: external `source_projection` or registered `kernel_policy_derivation`
+
+Each leaf record additionally carries the exact JSON-style destination path, `source_tokens` relative to its contract anchor, and hashes the delivered leaf. Filtered arrays resolve a stable object id such as `event_id`, `publication_id`, or `memory_id` before recording the original source index; compacted projected indices are never reused as source indices. Duplicate stable identities are rejected before projection, and identity-bearing lists never fall back to structural equality when identity resolution is missing or ambiguous.
+
+Before delivery, Kernel independently supplies the expected stage policy and exact recipient, verifies the external contract, complete field and leaf coverage, source-anchor hashes, source paths, source tokens, mapping modes, projection operations, duplicate or unknown paths, and every delivered value hash. Unanchored story fields quarantine the projection. Success creates a sealed `ValidatedProjection`; model dispatch accepts that permit rather than separate mutable `role`, `instance_id`, and `projected_context` arguments. The final context hash or top-level-only provenance is not sufficient.
+
+## Origin-Only Repair Projections
+
+Repair is another projection boundary, not permission to resend a global audit dump.
+
+| Repair packet | Recipient | Legal contents | Explicit exclusions |
+| --- | --- | --- | --- |
+| `WorldRepairContextPacket` | original `World Agent` instance | original legal World context, rejected tick, deterministic allowlisted violation codes, fixed constraints | Judge prose, Character-private data absent from the original context, new story suggestions |
+| `CharacterRepairContextPacket` | original `Character Agent` owner | original legal Character context, that Character's rejected proposal, code-only Judge repair objects | Judge ids, global audit context, other memory, hidden state, free-text Judge findings |
+| `NarrationRepairContextPacket` | original `Narrator Agent` instance | original legal narration view, rejected prose, code-only Judge repair objects | Judge ids, hidden facts, candidate material, global audit context, replacement prose |
+
+Repair count is fixture-bounded. A Judge-provided `field_path` must resolve inside the reviewed subject; paths into `source_context` or `global_audit_context` are blocked rather than forwarded. A repaired object must pass the complete original schema, deterministic validation, projection validation, and any required Authority review; failed content never enters working state merely because a retry exists.
+
+## Runtime Visibility and Retrieval Rules
+
+The executable profile applies these additional rules before delivery:
+
+1. `scene_public` requires `scope_ref` equal to the current `scene_id` and an explicit scene participant registry.
+2. `private_self` requires one observer equal to the event's primary actor and a matching owner `scope_ref`.
+3. `scene_pair` requires exactly two unique current scene participants and includes every event actor.
+4. `local_public`, `institution_public`, `city_public`, and `realm_public` require a registered scope instance with matching type and membership.
+5. Membership makes a scoped public record legally queryable; it does not make the member a direct observer.
+6. A newly committed event enters direct-observation memory only for explicit `observer_refs`; public-scope observers must also belong to the cited scope instance.
+7. A public ledger record enters a Character context only when the character has an explicit encounter ref and valid scope membership.
+8. Character memory retrieval filters by allowed status, ranks by declared salience with certainty fallback, applies the configured item cap, and records every excluded ref and reason.
+9. Superseded or withdrawn memory is excluded unless a later policy explicitly authorizes historical retrieval.
+10. `PublicationCandidate` and `CanonRevealCandidate` are system-restricted and absent from Character, Plot, and Narrator contexts.
+
+## Review and Replay Binding
+
+Projection is necessary but not sufficient for authority safety. Every `AuthorityReview` in the executable profile is also bound to:
+
+- exact `subject_id`, `subject_type`, and `subject_sha256`
+- non-empty `reviewed_fields` covering every critical field for that subject type
+- non-empty `authority_basis`
+- exact random `run_nonce`
+- exact `review_context_sha256`
+
+Missing or mismatched bindings quarantine the subject. The Kernel does not infer them from prose or route convenience.
 
 ## Hard Boundaries
 
@@ -249,8 +334,9 @@ This document should be read together with:
 - `scene-packet-schema-v0.1.md`
 - `scene-packet-to-memory-handoff-v0.1.md`
 
-Next protocol priority after this document:
+Current executable status:
 
-1. keep `Resolution` and `StateDelta` commit pipeline aligned with these projections
-2. keep `ScenePressurePacket` outputs constrained by the same context assembly rules
-3. design adversarial trace fixtures before building an autonomous scene runner
+1. the World-driven runtime emits and validates top-level plus recursively complete leaf provenance for every model-facing context
+2. adversarial fixtures cover hidden-state leakage, candidate leakage, public-scope confusion, replay, and projection laundering
+3. bounded origin-only World, Character, and Narrator repair projections are executable; Plot has no repair projection
+4. remaining work is broader long-form retrieval, canon-governance execution, and stronger semantic assurance beyond one Judge call

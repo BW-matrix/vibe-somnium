@@ -2,6 +2,11 @@
 
 This document defines the first rule set for deriving `MemoryDelta` objects from a committed `ScenePacket`.
 
+Runtime status:
+
+- this document defines the general handoff law
+- executable v0.2 performs handoff only after an atomic scene commit; see [world-driven-runtime-v0.1](world-driven-runtime-v0.1.md)
+
 The handoff is the protocol step that turns one committed scene packet into zero, one, or many owner-specific memory updates.
 
 Its job is to preserve local knowledge while still letting committed scene reality leave a usable trace inside `private_memory`.
@@ -135,6 +140,8 @@ Recommended policy:
 1. if an owner directly encountered the publication in the packet span, a `received_report` or `observation` delta may be written
 2. if the owner did not encounter the publication, the event may remain readable through `public_event_ledger` without being duplicated into `private_memory`
 
+Executable v0.2 distinguishes three mechanisms: public-scope membership permits scoped ledger queries; an explicit encounter ref permits a report to enter projected Character context; and a committed event's explicit `observer_refs` permit automatic `direct_observation` memory. Membership alone never writes private memory.
+
 This keeps public knowledge queryable without forcing mass memory duplication.
 
 ## Suggested Handoff Pipeline
@@ -191,11 +198,13 @@ A packet-to-memory handoff should count as valid only when all of the following 
 3. each output delta can be traced to allowed packet fields
 4. world-written and owner-written responsibilities remain separated
 5. any supersession or revision lineage is recorded where needed
+6. the scene transaction has committed and no later Authority, narration, pressure, budget, or sealing check failed
 
 Important consequence:
 
 - the handoff can be structurally valid even when resulting memory is partial, mistaken, or owner-biased
 - what matters is lawful derivation, not universal correctness
+- a rolled-back scene produces zero owner projections and zero derived memory deltas; quarantined working state is audit-only
 
 ## Example
 
@@ -261,8 +270,8 @@ This document should be read together with:
 - `agent-context-packet-and-field-visibility-v0.1.md`
 - `resolution-state-delta-commit-pipeline-v0.1.md`
 
-Next protocol priority after this document:
+Current executable status:
 
-1. design adversarial trace fixtures for owner projection and candidate leakage
-2. define memory retrieval policy for `CharacterContextPacket`
-3. prototype a paper scene runner before autonomous execution
+1. owner projection, candidate leakage, and late-rollback fixtures are implemented
+2. Character memory retrieval filters status, ranks salience, applies a cap, and records exclusions
+3. remaining work is multi-scene retention, contradiction handling, and controlled long-form summarization

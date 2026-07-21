@@ -16,7 +16,7 @@ if SRC not in sys.path:
 from a2a_literary_agents.config import RunnerConfig
 from a2a_literary_agents.llm import CodexCliAgentProvider
 from a2a_literary_agents.runner import run_trace
-from a2a_literary_agents.token_usage import estimate_tokens
+from a2a_literary_agents.token_usage import build_token_usage, estimate_tokens
 from a2a_literary_agents.validation import validate_plot
 
 
@@ -41,9 +41,17 @@ class TraceRunnerTests(unittest.TestCase):
         config = RunnerConfig.from_env(llm_mode="mock")
         return run_trace(path, self.tmp, config)
 
+    def test_runner_timeout_defaults_to_max_reasoning_safe_window(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(RunnerConfig.from_env(llm_mode="codex-cli").timeout_seconds, 240)
+
+        with patch.dict(os.environ, {"A2A_LLM_TIMEOUT_SECONDS": "90"}, clear=True):
+            self.assertEqual(RunnerConfig.from_env(llm_mode="codex-cli").timeout_seconds, 90)
+
     def test_allowed_trace_runs_full_pipeline(self) -> None:
         trace = self.run_fixture("allowed_archive_probe.json")
         self.assertEqual(trace["final_decision"], "allowed")
+        self.assertEqual(trace["runtime_mode"], "legacy_window_v0.1")
         self.assertEqual([run["agent_name"] for run in trace["agent_runs"]], ["plot", "character", "world", "narrator", "judge"])
         self.assertIn("scene_packet", trace)
         self.assertEqual(trace["judge_report"]["verdict"], "allow")
@@ -144,6 +152,35 @@ class TraceRunnerTests(unittest.TestCase):
         self.assertTrue(os.path.exists(first["artifacts"]["trace_json"]))
         self.assertTrue(os.path.exists(second["artifacts"]["trace_json"]))
 
+    def test_missing_or_unknown_runtime_mode_never_falls_back(self) -> None:
+        with open(self.fixture("allowed_archive_probe.json"), "r", encoding="utf-8") as f:
+            fixture = json.load(f)
+        fixture.pop("runtime_mode")
+        with self.assertRaisesRegex(ValueError, "runtime_mode"):
+            self.run_temp_fixture(fixture)
+
+    def test_legacy_trace_id_cannot_escape_output_directory(self) -> None:
+        with open(self.fixture("allowed_archive_probe.json"), "r", encoding="utf-8") as f:
+            fixture = json.load(f)
+        fixture["trace_id"] = r"..\escaped_legacy"
+        fixture_path = os.path.join(self.tmp, "malicious-legacy.json")
+        with open(fixture_path, "w", encoding="utf-8") as handle:
+            json.dump(fixture, handle)
+        out_dir = os.path.join(self.tmp, "artifacts")
+
+        with self.assertRaisesRegex(ValueError, "trace_id"):
+            run_trace(
+                fixture_path,
+                out_dir,
+                RunnerConfig.from_env(llm_mode="mock"),
+            )
+
+        self.assertFalse(os.path.exists(os.path.join(self.tmp, "escaped_legacy")))
+
+        fixture["runtime_mode"] = "world_drivn"
+        with self.assertRaisesRegex(ValueError, "runtime_mode"):
+            self.run_temp_fixture(fixture)
+
     def test_narrator_leak_is_blocked_after_full_pipeline(self) -> None:
         trace = self.run_fixture("adversarial_narrator_leak.json")
         self.assertEqual(trace["final_decision"], "blocked")
@@ -183,6 +220,26 @@ class TraceRunnerTests(unittest.TestCase):
 
         self.assertEqual(config.api_key, "explicit-token")
 
+    def test_trace_artifacts_never_serialize_provider_credentials(self) -> None:
+        secret = "provider-secret-must-not-appear"
+        auth_path = os.path.join(self.tmp, "private-auth.json")
+        config = RunnerConfig(
+            llm_mode="mock",
+            model="mock-model",
+            api_key=secret,
+            auth_json_path=auth_path,
+        )
+
+        trace = run_trace(self.fixture("allowed_archive_probe.json"), self.tmp, config)
+        serialized = json.dumps(trace, ensure_ascii=False)
+        with open(trace["artifacts"]["report_md"], "r", encoding="utf-8") as handle:
+            report = handle.read()
+
+        self.assertNotIn(secret, serialized)
+        self.assertNotIn(auth_path, serialized)
+        self.assertNotIn(secret, report)
+        self.assertNotIn(auth_path, report)
+
     def test_codex_cli_provider_uses_isolated_codex_home(self) -> None:
         codex_home = os.path.join(self.tmp, "codex-home")
         codex_workdir = os.path.join(self.tmp, "codex-workdir")
@@ -211,8 +268,9 @@ class TraceRunnerTests(unittest.TestCase):
 
             return Completed()
 
-        with patch("subprocess.run", fake_run):
-            result = CodexCliAgentProvider(config).complete("plot", "Return JSON.", {})
+        with patch.dict(os.environ, {"DUMMY_SECRET_TOKEN": "must-not-leak"}):
+            with patch("subprocess.run", fake_run):
+                result = CodexCliAgentProvider(config).complete("plot", "Return JSON.", {})
 
         self.assertIsNone(result.error)
         self.assertEqual(result.parsed_output, {"agent": "plot", "ok": True})
@@ -222,6 +280,8 @@ class TraceRunnerTests(unittest.TestCase):
         self.assertEqual(result.token_usage["input_tokens"], 42)
         self.assertEqual(result.token_usage["output_tokens"], 11)
         self.assertEqual(captured["env"]["CODEX_HOME"], codex_home)
+        self.assertNotIn("DUMMY_SECRET_TOKEN", captured["env"])
+        self.assertFalse(any(key.startswith("A2A_") for key in captured["env"]))
         self.assertEqual(captured["cwd"], codex_workdir)
         self.assertIn("--ephemeral", captured["command"])
         self.assertIn("--json", captured["command"])
@@ -229,7 +289,29 @@ class TraceRunnerTests(unittest.TestCase):
         self.assertIn("--ignore-rules", captured["command"])
         self.assertIn("--skip-git-repo-check", captured["command"])
         self.assertIn('approval_policy="never"', captured["command"])
+        self.assertIn('model_reasoning_effort="xhigh"', captured["command"])
+        self.assertIn('web_search="disabled"', captured["command"])
+        self.assertIn('shell_environment_policy.inherit="none"', captured["command"])
+        self.assertIn("--strict-config", captured["command"])
+        disable_index = captured["command"].index("--disable")
+        self.assertEqual(captured["command"][disable_index + 1], "shell_tool")
         self.assertIn("Do not inspect files", captured["input"])
+
+    def test_codex_cli_rejects_unknown_reasoning_effort_without_fallback(self) -> None:
+        config = RunnerConfig(
+            llm_mode="codex-cli",
+            model="gpt-5.5",
+            codex_binary="codex",
+            codex_home=os.path.join(self.tmp, "codex-home"),
+            codex_workdir=os.path.join(self.tmp, "codex-workdir"),
+            codex_reasoning_effort="dramatic",
+        )
+
+        with patch("subprocess.run") as run:
+            result = CodexCliAgentProvider(config).complete("world", "Return JSON.", {})
+
+        self.assertIn("invalid_codex_reasoning_effort", result.error or "")
+        run.assert_not_called()
 
     def test_plot_validator_handles_non_object_budget(self) -> None:
         violations = validate_plot(
@@ -251,6 +333,50 @@ class TraceRunnerTests(unittest.TestCase):
     def test_token_estimator_counts_cjk_text_more_conservatively(self) -> None:
         self.assertGreaterEqual(estimate_tokens("中文中文"), 4)
         self.assertGreater(estimate_tokens("Return exactly one JSON object."), 0)
+
+    def test_token_usage_rejects_negative_counts_and_marks_partial_usage(self) -> None:
+        negative = build_token_usage(
+            agent_name="world",
+            mode="codex-cli",
+            model="test",
+            input_text="input",
+            output_text="output",
+            max_output_tokens=100,
+            provider_usage={"input_tokens": -5, "output_tokens": -500, "total_tokens": -505},
+        )
+        self.assertEqual(negative["source"], "estimated_local")
+        self.assertGreaterEqual(negative["input_tokens"], 0)
+        self.assertGreaterEqual(negative["output_tokens"], 0)
+
+        partial = build_token_usage(
+            agent_name="world",
+            mode="codex-cli",
+            model="test",
+            input_text="input text",
+            output_text="output text",
+            max_output_tokens=100,
+            provider_usage={"total_tokens": 99},
+        )
+        self.assertEqual(partial["source"], "provider_usage_partial")
+        self.assertTrue(partial["is_estimated"])
+        self.assertEqual(partial["total_tokens"], 99)
+        self.assertEqual(partial["count_provenance"]["input_tokens"], "estimated_local")
+
+        inconsistent = build_token_usage(
+            agent_name="world",
+            mode="codex-cli",
+            model="test",
+            input_text="input text",
+            output_text="output text",
+            max_output_tokens=100,
+            provider_usage={"input_tokens": 10, "output_tokens": 5, "total_tokens": 999},
+        )
+        self.assertEqual(inconsistent["source"], "estimated_local")
+        self.assertTrue(inconsistent["is_estimated"])
+        self.assertEqual(
+            inconsistent["total_tokens"],
+            inconsistent["input_tokens"] + inconsistent["output_tokens"],
+        )
 
 
 if __name__ == "__main__":

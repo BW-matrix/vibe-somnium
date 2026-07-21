@@ -53,6 +53,20 @@ def character_context(fixture: dict[str, Any], pressure_packet: dict[str, Any]) 
             "private_memory_query": character.get("private_memory", []),
             "public_pressure": _public_pressure_view(pressure_packet),
             "forbidden_sources": ["raw_world_state_ledger", "other_private_memory", "latent_canon", "full_scene_packet"],
+            "required_output_shape": {
+                "dialogue_window": {
+                    "window_id": "stable id",
+                    "window_kind": "dialogue intent kind",
+                    "speaker_id": character_id,
+                    "addressee_ids": [],
+                    "local_goal": "owner-local goal",
+                    "stance": {},
+                    "disclosure_policy": {},
+                    "speech_acts": [],
+                    "fallback_if_blocked": "owner fallback",
+                    "exit_condition": "bounded exit condition",
+                }
+            },
         }
     )
     manifest = {
@@ -85,6 +99,19 @@ def world_context(
             "promote canon without Canon Steward",
             "treat plot pressure as destiny",
         ],
+        "required_output_shape": {
+            "world_resolution_bundle": {
+                "resolution": {},
+                "resolved_events": [],
+                "state_deltas": [],
+                "visibility_results": [],
+                "publication_candidates": [],
+                "public_event_deltas": [],
+                "canon_reveal_candidates": [],
+                "canon_effects_committed": [],
+                "authorized_interiority": [],
+            }
+        },
     }
     manifest = {
         "projection_type": "WorldResolutionContext",

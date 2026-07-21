@@ -1,5 +1,6 @@
 {
   "trace_id": "adversarial_plot_railroading",
+  "runtime_mode": "legacy_window_v0.1",
   "scene_id": "scene_archive_003",
   "window_id": "win_archive_003",
   "user_request": "Run one dramatic window and catch a Plot Agent pressure packet that puppets character choice.",

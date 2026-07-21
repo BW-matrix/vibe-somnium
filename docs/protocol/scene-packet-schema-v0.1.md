@@ -6,6 +6,12 @@ This document defines the first concrete schema for `ScenePacket`.
 
 It is the main structure that turns "resolved scene reality" into "legal narrative source material."
 
+Runtime status:
+
+- this document defines the general packet contract
+- [world-driven-runtime-v0.1](world-driven-runtime-v0.1.md) is the normative executable v0.2 profile
+- the executable profile treats the packet as the atomic scene-transaction output and attaches a deterministic `SealingRecord`
+
 ## Purpose
 
 `ScenePacket` exists to solve four protocol problems at once:
@@ -21,7 +27,7 @@ Without `ScenePacket`, the rule `narrator cannot invent facts` remains a princip
 
 `ScenePacket` should satisfy these constraints:
 
-1. It must only contain committed material.
+1. Its scene-reality fields must contain only committed material; pending governance candidates remain clearly typed, system-restricted records rather than story facts.
 2. It must distinguish objective consequence from public knowledge.
 3. It must expose interiority only through explicit authorization.
 4. It must preserve local knowledge and avoid hidden omniscience leakage.
@@ -31,12 +37,12 @@ Without `ScenePacket`, the rule `narrator cannot invent facts` remains a princip
 
 Recommended loop:
 
-1. `Plot Agent` injects scene pressure if needed
-2. `World Agent` publishes observations
-3. active `Character Agent` submits `Intent`, `ActionProposal`, or `DialogueWindow`
-4. `World Agent` resolves outcomes and commits state change
-5. `Orchestrator` assembles committed material into `ScenePacket`
-6. `Narrator Agent` renders prose from `NarratorInputPacket` projected from committed material
+1. `World Agent` advances simulation and requests owner decisions when required
+2. `Character Agent` submits an `EventProposal` through Router and Authority gates
+3. `World Agent` resolves approved proposals, schedules, or Plot translations
+4. `Authority Judge` reviews each exact adjudication before transaction-local acceptance
+5. `Runtime Kernel` projects narration checkpoints from visible accepted events
+6. `Runtime Kernel` seals committed material into `ScenePacket` after successful scene completion
 7. memory layers and manuscript layers inherit from the packet rather than from raw proposals
 
 Important rule:
@@ -68,7 +74,7 @@ The fields below describe the packet payload.
 | `packet_id` | yes | string | stable id for this committed packet |
 | `scene_id` | yes | string | parent scene identity |
 | `packet_scope` | yes | string | scene, subscene, or window-group scope |
-| `commit_status` | yes | string | draft or committed; narrator may only use committed |
+| `commit_status` | yes | string | `committed` or `quarantined` in executable v0.2; narrator may only use committed |
 | `pov_contract` | yes | object | the viewpoint and interiority rules for narration |
 | `resolved_events` | yes | array | what objectively happened in this packet span |
 | `state_deltas` | yes | array | committed changes to world state |
@@ -80,6 +86,7 @@ The fields below describe the packet payload.
 | `canon_effects_committed` | optional | array | approved canon reveal or mutation effects only |
 | `narration_bounds` | recommended | object | what narration may compress, must preserve, or must not claim |
 | `based_on` | recommended | array | source resolution ids, state refs, or packet lineage |
+| `sealing_record` | yes in executable v0.2 | object | deterministic source collections, hashes, included refs, and assembly policy |
 
 Compatibility note:
 
@@ -121,6 +128,10 @@ Suggested shape:
 | `outcome` | yes | what factually happened |
 | `visibility` | yes | who can directly know this event from the scene itself |
 | `causal_basis` | recommended | what resolution or rule basis produced this event |
+| `public_surface` | yes in executable v0.2 | externally projectable semantic surface, distinct from objective outcome |
+| `spoken_line_records` | yes in executable v0.2 | committed paraphrased semantics or exact committed wording |
+| `authorized_interiority` | yes in executable v0.2 | zero or more owner-grant-bound interiority records |
+| `commit_status` | yes in executable v0.2 | must equal `committed` inside a successful transaction |
 
 ## `state_deltas`
 
@@ -144,10 +155,18 @@ Suggested shape:
 
 | Field | Required | Meaning |
 | --- | --- | --- |
-| `delta_id` | yes | stable delta id |
-| `observer_scope` | yes | self, pair, scene group, public, or restricted subset |
-| `newly_visible` | yes | what became newly visible or inferable |
-| `certainty` | optional | low, medium, high |
+| `visibility_result_id` | yes in executable v0.2 | stable visibility result id |
+| `source_event_id` | yes in executable v0.2 | committed event whose visibility is being recorded |
+| `scope` | yes | `private_self`, `private_target`, `scene_pair`, `restricted_subset`, scoped public, or `system_restricted` |
+| `scope_ref` | yes in executable v0.2 | concrete owner, scene, location, institution, city, or realm scope instance |
+| `observer_refs` | yes | explicit direct observers; public membership remains registry-based |
+| `limits` | yes in executable v0.2 | semantic boundary on what observation does and does not reveal |
+
+Executable ownership rules:
+
+- `private_self` has exactly one observer equal to the event's `actors[0]`, and `scope_ref` names that owner
+- `scene_pair` has exactly two unique current scene participants and includes every event actor
+- visibility result fields exactly preserve the source event's visibility object
 
 ## `authorized_interiority`
 
@@ -169,6 +188,7 @@ Important rule:
 
 - absence of `authorized_interiority` should be treated as absence of permission
 - narrator must not infer full interiority from consequence alone unless the POV contract allows it
+- executable v0.2 also requires every interiority record to copy the Character-owned `interiority_grant` source field exactly and preserve its source hash; World cannot synthesize owner interiority
 
 ## `publication_candidates` and `public_event_deltas`
 
@@ -189,6 +209,7 @@ Important rule:
 
 - `publication_candidates` are not yet `public_event_ledger` entries
 - `public_event_deltas` should appear only after threshold approval
+- pending candidates are system-restricted, carry decision/expiry state, and are excluded from Character, Plot, and Narrator projections
 
 ## `canon_reveal_candidates` and `canon_effects_committed`
 
@@ -211,6 +232,7 @@ Important rule:
 - raw `latent_canon` should not be injected into narration through this field
 - candidates must not be narrated as approved public canon
 - only legalized reveal material belongs in `canon_effects_committed`
+- pending reveal candidates are readable only by the creating World step and Authority audit in the current executable profile
 
 ## `narration_bounds`
 
@@ -254,11 +276,22 @@ A `ScenePacket` should count as `committed` only when all of the following are t
 5. any canon-relevant content is either approved, explicitly marked as candidate, or excluded from factual narration
 6. the packet has been sealed by `Orchestrator` with source references
 
+Executable v0.2 replaces the legacy `Orchestrator` in condition 6 with deterministic `Runtime Kernel` sealing. It also requires:
+
+7. the complete scene transaction reached `finish_scene` without any late block
+8. every accepted adjudication and Plot disposition has an exact Authority approval
+9. all run-local identities and consumable inputs passed single-use replay checks
+10. the sealing record hashes every included source collection and the pre-seal packet payload; rollback moves quarantined adjudication ids to `excluded_refs` instead of source refs
+
+The public sample exporter first verifies this private seal. Because removing a private `run_id` changes `packet_id` and therefore the payload hash, it then recomputes collection hashes and attaches a distinct `seal_scope = sanitized_public_export` seal. A private seal is never presented as if it directly authenticated a redacted payload.
+
 Narrator rule:
 
-- `commit_status = committed` is required before `NarratorInputPacket` can be projected
-- draft packets may be reviewed by system layers but must not be treated as legal prose source material
+- a post-commit `NarratorInputPacket` requires `commit_status = committed`
+- executable v0.2 instead projects a transaction-local `NarrationCheckpoint` from already accepted World events before outward packet commit; its prose remains unpublished working material until the scene transaction succeeds
+- draft packets may be reviewed by system layers but must not be treated as externally published prose source material
 - pending `publication_candidates` and `canon_reveal_candidates` must be excluded from factual narration unless separately approved and projected
+- if any later validation fails, the packet is outwardly empty of resolved facts, narration is unpublished, and transaction-local state/prose is retained only as quarantined audit material
 
 For the full commit pipeline and two-phase semantics, see [resolution-state-delta-commit-pipeline-v0.1](resolution-state-delta-commit-pipeline-v0.1.md).
 
@@ -370,8 +403,10 @@ This document should be read together with:
 - `agent-context-packet-and-field-visibility-v0.1.md`
 - `resolution-state-delta-commit-pipeline-v0.1.md`
 
-Next protocol priority after this document:
+Current executable status:
 
-1. design adversarial trace fixtures for packet projection and candidate leakage
-2. define narration grounding validation against `NarratorInputPacket`
-3. prototype a paper scene runner before autonomous execution
+1. projection and candidate-leakage fixtures are implemented
+2. Narrator output carries a claim map and receives an Authority grounding review
+3. scene publication and packet-to-memory handoff are atomic with late-failure rollback
+4. working narration is explicitly separated from published and quarantined narration
+5. remaining work includes multi-scene packet chains and in-loop canon/publication promotion

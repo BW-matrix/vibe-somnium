@@ -6,6 +6,11 @@ The goal is to let `Plot Agent` create tension without becoming a hidden god-aut
 
 `Plot Agent` may introduce pressure. It may not choose character actions, declare world facts, or guarantee outcomes.
 
+Runtime status:
+
+- this document defines the general pressure law
+- the executable World-driven profile uses `PlotPulse`, `PressureLedger`, `OptionTopologyCheck`, and explicit `PlotPulseDisposition`; see [world-driven-runtime-v0.1](world-driven-runtime-v0.1.md)
+
 ## Purpose
 
 `ScenePressurePacket` exists to solve five protocol problems:
@@ -38,8 +43,8 @@ Suggested payload fields:
 | `scene_id` | yes | string | parent scene |
 | `beat_id` | recommended | string | structural beat if applicable |
 | `pressure_kind` | yes | string | category of pressure |
-| `scope` | yes | string | scene, subscene, location, relationship, institution, or timeline scope |
-| `duration` | yes | string | one_window, scene, chapter, scheduled, or until_condition |
+| `scope` | yes | string | executable scope enum listed below |
+| `duration` | yes | string | executable duration enum listed below |
 | `affected_options` | yes | array | options made harder, costlier, more urgent, or more visible |
 | `non_forcing_clause` | yes | string | how character agency remains open |
 | `world_fact_dependency` | recommended | array | existing facts or public/canon refs this pressure depends on |
@@ -68,6 +73,8 @@ Important rule:
 | `information_asymmetry` | uneven access to public or private fragments | Lin knows one clue Wei does not know Lin heard |
 | `escalation_signal` | signal that stakes are rising without choosing result | guards have begun asking procedural questions |
 
+These nine values are the complete executable `pressure_kind` allowlist. The executable `scope` allowlist is `beat`, `scene`, `sequence`, `subscene`, `location`, `relationship`, `institution`, and `timeline`. The executable `duration` allowlist is `one_window`, `next_beat`, `next_two_beats`, `scene`, `chapter`, `scheduled`, and `until_condition`. Unknown values are hard-blocked; they are not normalized as creative synonyms. The projected Plot output schema contains these exact enums.
+
 ## Forbidden Pressure Kinds
 
 The following are not legal pressure:
@@ -92,7 +99,7 @@ Suggested budget fields:
 
 | Field | Required | Meaning |
 | --- | --- | --- |
-| `intensity` | yes | low, medium, high, critical |
+| `intensity` | yes | low, medium, high |
 | `novelty` | recommended | recurring, escalated, new |
 | `stacking_count` | recommended | how many active pressures affect the same choice space |
 | `relief_available` | recommended | whether the scene still permits pause, retreat, or alternate route |
@@ -104,7 +111,22 @@ Budget rules:
 2. repeated pressure on the same choice must show why it is not railroading
 3. pressure should usually make options costly, not impossible
 4. if all options but one are removed, the packet should be quarantined or rewritten
-5. `agency_risk = high` requires Orchestrator review before routing
+5. `agency_risk = high` requires `Authority Judge` review before World translation
+
+## Cumulative Pressure Ledger
+
+Single-packet legality does not prove that a sequence preserves agency. The executable runtime therefore records every approved pulse in a scene-local `PressureLedger` and validates cumulative pressure before it can be presented to World.
+
+The cumulative check records:
+
+- active pressure count and cumulative intensity
+- same-option stacking
+- current meaningful option ids
+- whether a refusal path remains
+- whether a non-plot-compliant but world-legal alternative remains
+- whether relief or agency restoration is required
+
+`OptionTopologyCheck` blocks a pulse when pressure removes every meaningful option but one, repeatedly targets one predetermined outcome, or lacks the declared alternatives needed to substantiate its `non_forcing_clause`.
 
 ## Non-Forcing Clause
 
@@ -139,6 +161,19 @@ Important rule:
 - `World Agent` may accept, downgrade, transform, or reject a translation request
 - rejected translation may still remain as structure note, but not as fact
 
+In the executable runtime, every approved `PlotPulse` must receive an explicit World-owned `PlotPulseDisposition` before scene completion. Allowed dispositions are:
+
+- `accepted`: World may bind it to an existing world condition or translate it through a source-bound adjudication
+- `downgraded`: World may bind a weaker form to an existing condition or create it through a source-bound adjudication
+- `deferred`: the pulse remains non-factual and cannot affect the current scene
+- `rejected`: the pulse is consumed without world effect
+
+The Kernel cannot synthesize a final disposition. If a pulse is still pending, it forces another World tick and another Authority review.
+
+If an approved Character proposal is pending in that same tick, World adjudicates the proposal and disposes the pulse as two distinct authority acts. Both ids appear in `consumed_input_refs`; Plot pressure does not replace the proposal as adjudication input and the proposal does not make the pressure disappear.
+
+For `accepted` or `downgraded`, `world_condition_refs` may cite only conditions already registered in World context unless the same tick includes an adjudication that commits exactly one new event. Every resulting state delta must cite that event. `deferred` and `rejected` require an empty condition-ref list and no adjudication.
+
 ## Field Projection and Visibility
 
 Not every agent receives the same pressure view.
@@ -149,7 +184,8 @@ Not every agent receives the same pressure view.
 | `World Agent` | full pressure packet needed for adjudication, excluding plot-only destiny language |
 | `Narrator Agent` | only pressure that is committed into `NarratorInputPacket` or render bounds |
 | `Canon Steward` | only canon-relevant pressure requests |
-| `Orchestrator` | full routing and validation metadata |
+| `Runtime Kernel` | full routing and structural-validation metadata; no semantic pressure judgment |
+| `Authority Judge` | subject-specific audit context needed to review agency and grounding |
 
 Important rule:
 
@@ -160,7 +196,7 @@ Important rule:
 
 | Rule | Behavior |
 | --- | --- |
-| missing `pressure_kind` | warn and require repair |
+| missing or unknown `pressure_kind`, `scope`, or `duration` | hard block; Plot currently has no repair loop |
 | missing `non_forcing_clause` | quarantine until repaired |
 | missing `visibility` | quarantine unless route has one unique legal value |
 | pressure specifies character choice | hard block |
@@ -168,6 +204,10 @@ Important rule:
 | pressure depends on new canon | reroute to `CanonMutationRequest` |
 | pressure uses raw hidden cognition | quarantine |
 | pressure stacks too heavily | downgrade, split, or require budget review |
+
+Executable normalization is intentionally narrower than this conceptual repair table. The only current recoverable synonym is `budget_cost.intensity = moderate`, normalized to `medium` with a warning and a `NormalizationRecord` containing path, policy, and before/after values. The raw model output remains in the trace. Missing or malformed security-critical, authority, identity, visibility, source, target, or canon fields are never normalized, and Plot currently has no retry loop.
+
+All pulse and disposition identifiers obey the executable protocol-id grammar and replay checks. An inactive `deferred` or `rejected` disposition carrying an adjudication is quarantined even when the adjudication is otherwise well formed; World cannot disguise a Plot-authored world change behind an inactive label.
 
 ## Hard Boundaries
 
@@ -238,8 +278,9 @@ This document should be read together with:
 - `resolution-state-delta-commit-pipeline-v0.1.md`
 - `agent-context-packet-and-field-visibility-v0.1.md`
 
-Next protocol priority after this document:
+Current executable status:
 
-1. build adversarial pressure fixtures for railroading, hidden fact smuggling, and over-stacking
-2. align dialogue evaluation metrics with agency preservation
-3. prototype a paper scene trace before autonomous execution
+1. adversarial fixtures cover railroading, hidden-fact smuggling, option collapse, and cumulative over-stacking
+2. every pending pulse requires an explicit source-bound World disposition before final commit
+3. existing-condition reuse and new-condition adjudication are separate validated branches
+4. remaining work is multi-scene budget persistence and empirical calibration of intensity costs

@@ -83,16 +83,26 @@ def validate_world(bundle: dict[str, Any] | None) -> list[dict[str, Any]]:
     return violations
 
 
-def validate_narration(narrator_output: dict[str, Any] | None, narrator_input: dict[str, Any]) -> list[dict[str, Any]]:
+def validate_narration(
+    narrator_output: dict[str, Any] | None,
+    narrator_input: dict[str, Any],
+    validation_bounds: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     violations: list[dict[str, Any]] = []
     if not narrator_output:
         return [_violation("narration_schema", "missing_narration", "Narrator Agent did not return output.")]
+    unexpected_fields = sorted(set(narrator_output) - {"prose"})
+    if unexpected_fields:
+        violations.append(_violation("narration_schema", "undeclared_narration_field", "Narrator output contains undeclared fields: " + ", ".join(unexpected_fields)))
     prose = str(narrator_output.get("prose", ""))
     if not prose:
         violations.append(_violation("narration_schema", "missing_prose", "Narrator output has no prose field."))
 
     lowered = prose.lower()
-    forbidden_patterns = narrator_input.get("narration_bounds", {}).get("forbidden_claim_patterns", [])
+    narration_bounds = validation_bounds or narrator_input.get("narration_bounds", {})
+    if not narration_bounds and isinstance(narrator_input.get("narration_checkpoint"), dict):
+        narration_bounds = narrator_input["narration_checkpoint"].get("narration_bounds", {})
+    forbidden_patterns = narration_bounds.get("forbidden_claim_patterns", [])
     for pattern in forbidden_patterns:
         if pattern.lower() in lowered:
             violations.append(_violation("narration_grounding", "forbidden_claim", f"Prose contains forbidden claim pattern: {pattern}"))

@@ -8,6 +8,11 @@ The goal is to keep dialogue coordination compact enough for real scene flow, wh
 
 `DialogueWindow` is the default coordination unit for spoken interaction inside a scene.
 
+Runtime status:
+
+- `DialogueWindow` remains the general dialogue design unit
+- the executable World-driven v0.2 profile currently transports one bounded dialogue move as an `EventProposal`, then commits speech through `spoken_line_records`; see [world-driven-runtime-v0.1](world-driven-runtime-v0.1.md)
+
 It is not:
 
 - one raw utterance
@@ -175,6 +180,17 @@ Important rule:
 - `candidate_lines` remain non-authoritative
 - even if a line appears in a `DialogueWindow`, it is not canonically spoken until the resolution and packet pipeline commits it
 
+## Executable Speech Commit Semantics
+
+World-driven v0.2 does not allow Narrator to promote a candidate line by merely quoting it. A committed speech event contains `spoken_line_records` with one of two statuses:
+
+| Status | Required content | Narrator permission |
+| --- | --- | --- |
+| `paraphrased` | `speaker_id` plus committed `semantic_content` | Narrator may phrase the semantics without strengthening the claim |
+| `exact_committed` | `speaker_id` plus exact `text` | Narrator must preserve exact wording when quoting the line |
+
+The speaker must be a registered actor in the committed event. Candidate text, expected effect, and private disclosure policy are never sufficient evidence that a line was spoken or that it succeeded.
+
 ## Validation Rules
 
 | Rule | Behavior |
@@ -257,12 +273,9 @@ It should not treat it as:
 }
 ```
 
-## Relationship to Future Specs
+## Relationship to Runtime Specs
 
-This document does not yet define:
-
-- `NarratorInputPacket` projection details
-- dialogue-specific evaluation metrics
+This document does not define dialogue-quality metrics. Runtime projection, speech commitment, and narration grounding are defined by the following specifications.
 
 Related runtime specs:
 
