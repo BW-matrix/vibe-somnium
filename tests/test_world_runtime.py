@@ -198,6 +198,10 @@ class WorldDrivenRuntimeTests(unittest.TestCase):
             for run in trace["agent_runs"]
         ]
         self.assertEqual(actual_calls, expected_calls)
+        self.assertGreaterEqual(trace["elapsed_seconds"], 0)
+        self.assertTrue(
+            all(run["elapsed_seconds"] >= 0 for run in trace["agent_runs"])
+        )
         self.assertEqual(
             [
                 run["agent_instance_id"]
@@ -937,6 +941,59 @@ class WorldDrivenRuntimeTests(unittest.TestCase):
             )
         )
 
+    def test_plot_stacking_count_is_derived_from_pressure_ledger(self) -> None:
+        fixture = copy.deepcopy(self.load_fixture())
+        current_pulse = fixture["mock_agent_outputs"]["plot"][0]["plot_pulse"]
+        prior_pulse = copy.deepcopy(current_pulse)
+        prior_pulse["pulse_id"] = "pulse_prior_same_kind_001"
+        fixture["pressure_history"] = [
+            {
+                "approval_id": "approved_pulse_prior_same_kind_001",
+                "pulse_id": "pulse_prior_same_kind_001",
+                "pulse_sha256": "a" * 64,
+                "authority_binding_sha256": "b" * 64,
+                "original_plot_pulse": prior_pulse,
+            }
+        ]
+
+        normalized_pulse = copy.deepcopy(current_pulse)
+        normalized_pulse["budget_cost"]["stacking_count"] = 2
+        normalized_hash = hashlib.sha256(
+            stable_json(normalized_pulse).encode("utf-8")
+        ).hexdigest()
+        plot_review = _find_authority_review(fixture, "plot_pulse")
+        plot_review["subject_sha256"] = normalized_hash
+        disposition = fixture["mock_agent_outputs"]["world"][3][
+            "world_tick_result"
+        ]["plot_pulse_disposition"]
+        disposition["pulse_sha256"] = normalized_hash
+        disposition_review = _find_authority_review(
+            fixture, "plot_pulse_disposition"
+        )
+        disposition_review["subject_sha256"] = hashlib.sha256(
+            stable_json(disposition).encode("utf-8")
+        ).hexdigest()
+
+        trace = self.run_temp_fixture(fixture)
+
+        self.assertEqual(
+            trace["final_decision"],
+            "allowed",
+            msg=json.dumps(trace["validation"], ensure_ascii=False, indent=2),
+        )
+        self.assertEqual(
+            trace["plot_pulses"][0]["budget_cost"]["stacking_count"],
+            2,
+        )
+        self.assertEqual(
+            next(
+                record
+                for record in trace["normalization_records"]
+                if record["code"] == "normalized_plot_stacking_count"
+            )["before"],
+            1,
+        )
+
     def test_router_cannot_redirect_wei_request_to_lin(self) -> None:
         fixture = copy.deepcopy(self.load_fixture())
         fixture["trace_id"] = "world_driven_router_mismatch"
@@ -1320,6 +1377,66 @@ class WorldDrivenRuntimeTests(unittest.TestCase):
             any(
                 item["code"] == "visibility_binding_mismatch"
                 for item in trace["validation"]["world_tick_1_rejected"]
+            )
+        )
+
+    def test_world_spoken_line_schema_drift_uses_origin_only_repair(self) -> None:
+        fixture = copy.deepcopy(self.load_fixture())
+        world_outputs = fixture["mock_agent_outputs"]["world"]
+        corrected = copy.deepcopy(world_outputs[1])
+        spoken_line = world_outputs[1]["world_tick_result"]["adjudication"][
+            "committed_events"
+        ][0]["spoken_line_records"][0]
+        spoken_line["status"] = "quoted"
+        spoken_line["semantic_content"] = spoken_line.pop("semantic_content")
+        world_outputs.insert(2, corrected)
+
+        trace = self.run_temp_fixture(fixture)
+
+        self.assertEqual(
+            trace["final_decision"],
+            "allowed",
+            msg=json.dumps(trace["validation"], ensure_ascii=False, indent=2),
+        )
+        repair_codes = {
+            code
+            for attempt in trace["repair_attempts"]
+            if attempt["origin_agent_id"] == "world_controller"
+            for code in attempt["repair_codes"]
+        }
+        self.assertIn("invalid_spoken_line_status", repair_codes)
+        self.assertIn("undeclared_field", repair_codes)
+
+        non_speech_fixture = copy.deepcopy(self.load_fixture())
+        proposal = non_speech_fixture["mock_agent_outputs"]["character"][0][
+            "event_proposal"
+        ]
+        proposal["action_type"] = "refusal"
+        proposal_review = _find_authority_review(
+            non_speech_fixture,
+            "event_proposal",
+            proposal["proposal_id"],
+        )
+        proposal_review["subject_sha256"] = hashlib.sha256(
+            stable_json(proposal).encode("utf-8")
+        ).hexdigest()
+
+        blocked_trace = self.run_temp_fixture(non_speech_fixture)
+
+        self.assertEqual(
+            blocked_trace["runtime_status"],
+            "quarantined_world_tick",
+        )
+        self.assertTrue(
+            any(
+                item["code"] == "speech_not_proposed"
+                for item in blocked_trace["validation"]["world_tick_1"]
+            )
+        )
+        self.assertFalse(
+            any(
+                "speech_not_proposed" in attempt["repair_codes"]
+                for attempt in blocked_trace["repair_attempts"]
             )
         )
 
@@ -2513,6 +2630,25 @@ class WorldDrivenRuntimeTests(unittest.TestCase):
                         for item in trace["validation"]["route_cdr_wei_001"]
                     )
                 )
+
+    def test_reserved_protocol_id_blocks_cross_scene_replay(self) -> None:
+        fixture = copy.deepcopy(self.load_fixture())
+        fixture["trace_id"] = "world_driven_reserved_protocol_replay"
+        fixture["reserved_protocol_ids"] = ["wt_archive_000"]
+
+        trace = self.run_temp_fixture(fixture)
+
+        self.assertEqual(trace["runtime_status"], "quarantined_world_tick")
+        self.assertTrue(
+            any(
+                item["code"] == "protocol_id_replay"
+                for item in trace["validation"]["world_tick_0"]
+            )
+        )
+        self.assertEqual(
+            trace["runtime_state"]["reserved_protocol_ids"],
+            ["wt_archive_000"],
+        )
 
     def test_private_self_and_scene_pair_visibility_are_owner_bound(self) -> None:
         private_fixture = copy.deepcopy(self.load_fixture())

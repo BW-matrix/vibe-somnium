@@ -646,11 +646,15 @@ def authority_review_context(
             for owner, data in fixture.get("characters", {}).items()
         },
     }
-    forbidden_protocol_ids = sorted(
+    forbidden_protocol_source_ids = [
         str(identity)
-        for identity in runtime_state.get("used_protocol_ids", [])
+        for identity in [
+            *runtime_state.get("reserved_protocol_ids", []),
+            *runtime_state.get("used_protocol_ids", []),
+        ]
         if isinstance(identity, str)
-    )
+    ]
+    forbidden_protocol_ids = sorted(forbidden_protocol_source_ids)
     review_context_sha256 = _content_hash(
         {
             "run_nonce": run_nonce,
@@ -804,9 +808,9 @@ def authority_review_context(
                 "derive_sha256_from_exact_review_context",
             ),
             "forbidden_protocol_ids": _provenance(
-                "runtime_state.used_protocol_ids",
-                runtime_state.get("used_protocol_ids", []),
-                "sort_and_copy_for_authority_id_replay_prevention",
+                "runtime_state.reserved_protocol_ids+runtime_state.used_protocol_ids",
+                forbidden_protocol_source_ids,
+                "combine_sort_and_copy_for_cross_scene_authority_id_replay_prevention",
             ),
             "subject": _provenance(
                 f"runtime.review_subject.{subject_type}", subject, "exact_copy"

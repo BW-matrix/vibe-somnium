@@ -52,6 +52,7 @@ The repository now includes a minimal Python runner:
 - isolated `codex-cli` backend for headless local Codex execution
 - OpenAI-compatible `real` backend for API-compatible providers
 - a World-driven state machine with independent character-agent calls
+- an explicit committed two-scene handoff that carries World history, owner-only memory, pressure, and reserved protocol ids without a persistent database
 - hard identity, routing, visibility, source-reference, replay, and content-hash checks
 - one origin-bound malformed-JSON retry guarded by deterministic syntax/content conservation, followed by fail-closed quarantine, plus syntax- and length-bounded protocol identities
 - run-bound semantic Authority Judge gates for requests, proposals, World adjudication, Plot pressure, prose, and Plot disposition
@@ -91,6 +92,12 @@ Run the World-driven two-character fixture:
 python scripts/run_trace.py run --fixture fixtures/traces/world_driven_archive_exchange.json --llm-mode mock
 ```
 
+Run the bounded two-scene continuity study:
+
+```powershell
+python scripts/run_two_scene_study.py --scene-one fixtures/traces/world_driven_archive_exchange.json --scene-two-template fixtures/traces/world_driven_dawn_inspection_followup.json --out .local/two-scene-study --llm-mode codex-cli --max-rounds 100
+```
+
 Run with an isolated Codex CLI backend:
 
 ```powershell
@@ -109,6 +116,7 @@ python scripts/run_trace.py run --fixture fixtures/traces/world_driven_archive_e
 | Fixture | Expected | Purpose |
 | --- | --- | --- |
 | `world_driven_archive_exchange.json` | `allowed` | World requests separate Wei and Lin decisions; Router, Authority Judge, World adjudication, Plot checkpoint, and Narrator checkpoint all run |
+| `world_driven_dawn_inspection_followup.json` | real-provider follow-up template | materialized only after a committed first scene; tests cross-scene state, owner memory, pressure, and protocol-id continuity; intentionally has no fabricated mock outputs |
 | `world_driven_scheduled_bell.json` | `allowed` | World consumes a registered scheduled event without inventing a Character choice |
 | `allowed_archive_probe.json` | `allowed` | legal pressure, legal character probing, scoped suspicion, legal narration, Judge allow |
 | `adversarial_narrator_leak.json` | `blocked` | narrator turns suspicion into confirmed guilt; deterministic validator and Judge block it |
@@ -121,6 +129,12 @@ One isolated `gpt-5.5` Codex CLI run of `world_driven_archive_exchange.json` com
 The public sample preserves every model-agent's parsed output and per-call usage while excluding prompts, projected context payloads, raw provider JSONL, local paths, private run identifiers, and authentication state. Export requires a successful committed Codex CLI trace with exact provider usage, one uniquely bound manifest and contract per call, consistent recipient and context hashes, complete recursively delivered leaf coverage, contract-bound leaf source paths and operations, manifest/contract policy parity, no unanchored field or blocking validation, and a valid private ScenePacket seal. It then creates a separate `sanitized_public_export` seal. See [World-Driven Real Codex Sample v0.2](docs/runner/world-driven-real-sample-v0.2.md).
 
 The invoked roles were World, Authority, Router, two independent Character instances, Plot, and Narrator. Canon Steward was not invoked because this fixture produced no executable canon-promotion step; the sample does not fabricate placeholder agent output.
+
+## Two-Scene Continuity Study
+
+A final isolated `gpt-5.5` hardening run completed two consecutive committed scenes under independent 100-World-tick and 100-model-call caps per scene. The accepted pair used 38 calls, 8 World ticks, 522,424 input tokens, 53,351 output tokens, and 575,775 total tokens in 1,624.597 runtime seconds. All 13 current checks passed, including full fixture/packet binding, exact owner-memory allowlisting, exact pressure transfer, complete 33-id reservation, and cross-scene non-replay.
+
+The discovery campaign and final rerun consumed 1,447,739 tokens across 96 calls. Negative attempts exposed one Authority miss on a mixed Character action and one mechanically derivable Plot count error; independent review then found incomplete fixture, memory, and Kernel-id binding in the historical harness. Those gaps were fixed and the final pair rerun successfully. Its prose still contains a Lin pronoun inconsistency, demonstrating that protocol continuity is stronger than current literary-presentation continuity. See the [full study](docs/research/two-scene-continuity-study-v0.3.md) and the complete sanitized outputs for [Scene 1](docs/research/two-scene-continuity-scene-1-public-trace-v0.3.md) and [Scene 2](docs/research/two-scene-continuity-scene-2-public-trace-v0.3.md).
 
 ## Protocol Documents
 
@@ -152,7 +166,7 @@ The invoked roles were World, Authority, Router, two independent Character insta
 
 ## Current Limits
 
-- The World-driven runner is a bounded scene prototype, not a persistent story server.
+- The World-driven runner now has a bounded two-scene materialization helper, but it is not a persistent story server or campaign database.
 - Eligible World structural failures, Character `EventProposal` review failures, and Narrator review failures support one bounded origin-only semantic repair by default. Any agent may receive one separately sealed syntax-only JSON retransmission; Plot has no content or authority repair loop.
 - Security-critical, authority, visibility, identity, replay, and unapproved repair failures quarantine the path; exhausted repair limits also quarantine it.
 - Runtime Kernel validators enforce interfaces, provenance, and ownership; natural-language causal and prose coverage still depends on Authority Judge quality.

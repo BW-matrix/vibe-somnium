@@ -373,6 +373,10 @@ The World-driven tests cover:
 - World causal, state, visibility, and interiority binding
 - Character source-actor and exactly-one speech-record binding
 - cross-scene request and PlotPulse rejection
+- complete source-fixture hash binding before a reused Scene 1 trace may materialize Scene 2
+- exact per-owner private-memory allowlisting plus conflicting memory-id rejection
+- reservation of Kernel-generated ScenePacket and MemoryDelta ids as well as model/runtime ids
+- hard failure when a non-speech Character proposal produces committed speech
 - private-self ownership and scene-pair membership
 - Plot executable enums, cumulative pressure, option topology, and rejected-pulse no-adjudication
 - candidate lifecycle and read isolation
@@ -383,7 +387,7 @@ The World-driven tests cover:
 - missing, forged, reused, or blocking projection-evidence export rejection
 - provider token consistency plus per-call and total transition blocks
 
-The current full suite passes 100 tests and 16 subtests.
+The current full suite passes 107 tests and 16 subtests.
 
 Run only this module:
 
@@ -394,7 +398,7 @@ python -m pytest -q tests/test_world_runtime.py
 ## Current Limits
 
 - no persistent campaign database
-- no automatic cross-scene deferred pressure handoff
+- one explicit two-scene materialization helper carries committed World history, exact owner-only memory, deferred pressure, and complete model/runtime plus Kernel protocol ids; reused traces require an exact source-fixture content hash, and the helper is not a general campaign store
 - no Plot content or authority repair loop; semantic World, Character, and Narrator repairs remain narrow and bounded, while every role shares one syntax-only JSON retransmission
 - no in-loop publication or Canon Steward promotion
 - candidate expiry is validated but not aged across persistent scene time

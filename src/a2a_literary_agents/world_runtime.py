@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import secrets
+import time
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -60,6 +61,7 @@ WORLD_ORIGIN_REPAIRABLE_CODES = {
     "incomplete_causal_binding",
     "invalid_alternative_outcome",
     "invalid_collection_item",
+    "invalid_spoken_line_status",
     "missing_committed_event",
     "scene_observer_not_participant",
     "visibility_binding_mismatch",
@@ -85,6 +87,7 @@ class ValidatedProjection:
 
 
 def run_world_trace(fixture_path: str, out_dir: str, config: RunnerConfig) -> dict[str, Any]:
+    trace_started_at = time.perf_counter()
     fixture = load_json_file(fixture_path)
     created_at = datetime.now(timezone.utc).isoformat()
     run_id = _run_id(created_at)
@@ -110,6 +113,9 @@ def run_world_trace(fixture_path: str, out_dir: str, config: RunnerConfig) -> di
         "checkpoint_policy": checkpoint_policy,
         "last_plot_event_index": 0,
         "last_narrated_event_index": 0,
+        "reserved_protocol_ids": deepcopy(
+            fixture.get("reserved_protocol_ids", [])
+        ),
         "used_protocol_ids": [],
     }
     initial_runtime_state = deepcopy(runtime_state)
@@ -443,7 +449,11 @@ def run_world_trace(fixture_path: str, out_dir: str, config: RunnerConfig) -> di
         if transaction_committed
         else {"owner_projections": [], "derived_memory_deltas": []}
     )
-    return _finish_trace(trace, run_dir)
+    return _finish_trace(
+        trace,
+        run_dir,
+        elapsed_seconds=time.perf_counter() - trace_started_at,
+    )
 
 
 def _run_character_decision(
@@ -662,7 +672,10 @@ def _run_due_checkpoints(
             config=config,
         )
         pulse = _payload(plot_output, "plot_pulse")
-        pulse, normalization_records = _normalize_plot_pulse(pulse)
+        pulse, normalization_records = _normalize_plot_pulse(
+            pulse,
+            runtime_state.get("pressure_ledger", []),
+        )
         trace["normalization_records"].extend(normalization_records)
         pulse_violations = validate_plot_pulse(
             pulse,
@@ -1018,6 +1031,7 @@ def _call_agent(
         return None
 
     prompt = build_prompt(role, projected_context)
+    call_started_at = time.perf_counter()
     completion = provider.complete(
         role,
         prompt,
@@ -1029,6 +1043,7 @@ def _call_agent(
             ),
         },
     )
+    call_elapsed_seconds = time.perf_counter() - call_started_at
     record = {
         "call_index": len(trace["agent_runs"]),
         "agent_name": role,
@@ -1043,6 +1058,7 @@ def _call_agent(
         "parsed_output": completion.parsed_output,
         "error": completion.error,
         "token_usage": completion.token_usage,
+        "elapsed_seconds": round(call_elapsed_seconds, 6),
     }
     trace["agent_runs"].append(record)
     budget_violation = False
@@ -1197,34 +1213,86 @@ def _record_validation(
 
 
 def _world_origin_repairable(violations: list[dict[str, Any]]) -> bool:
-    blocking_codes = {
-        str(item.get("code"))
-        for item in violations
-        if item.get("severity") == "block"
-    }
+    blocking = [
+        item for item in violations if item.get("severity") == "block"
+    ]
+    blocking_codes = {str(item.get("code")) for item in blocking}
+    undeclared_fields = [
+        item for item in blocking if item.get("code") == "undeclared_field"
+    ]
+    spoken_line_schema_drift = (
+        "invalid_spoken_line_status" in blocking_codes
+        and undeclared_fields
+        and all(
+            str(item.get("kind", "")).startswith("spoken_line_records[")
+            for item in undeclared_fields
+        )
+    )
+    if undeclared_fields and not spoken_line_schema_drift:
+        return False
+    if spoken_line_schema_drift:
+        blocking_codes.discard("undeclared_field")
     return bool(blocking_codes) and blocking_codes <= WORLD_ORIGIN_REPAIRABLE_CODES
 
 
 def _normalize_plot_pulse(
     pulse: dict[str, Any] | None,
+    pressure_ledger: list[dict[str, Any]] | None = None,
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     if not isinstance(pulse, dict):
         return pulse, []
     normalized = deepcopy(pulse)
+    records: list[dict[str, Any]] = []
     budget = normalized.get("budget_cost")
-    if not isinstance(budget, dict) or budget.get("intensity") != "moderate":
-        return normalized, []
-    budget["intensity"] = "medium"
-    return normalized, [
-        {
-            "code": "normalized_plot_intensity",
-            "message": "Normalized recoverable PlotPulse intensity synonym moderate -> medium.",
-            "field_path": "plot_pulse.budget_cost.intensity",
-            "before": "moderate",
-            "after": "medium",
-            "policy": "recoverable_schema_value_normalization_v0.1",
-        }
-    ]
+    if not isinstance(budget, dict):
+        return normalized, records
+    if budget.get("intensity") == "moderate":
+        budget["intensity"] = "medium"
+        records.append(
+            {
+                "code": "normalized_plot_intensity",
+                "message": "Normalized recoverable PlotPulse intensity synonym moderate -> medium.",
+                "field_path": "plot_pulse.budget_cost.intensity",
+                "before": "moderate",
+                "after": "medium",
+                "policy": "recoverable_schema_value_normalization_v0.1",
+            }
+        )
+
+    stacking_count = budget.get("stacking_count")
+    pressure_kind = normalized.get("pressure_kind")
+    if (
+        isinstance(stacking_count, int)
+        and not isinstance(stacking_count, bool)
+        and isinstance(pressure_kind, str)
+    ):
+        expected_stacking_count = (
+            sum(
+                1
+                for entry in pressure_ledger or []
+                if isinstance(entry, dict)
+                and isinstance(entry.get("original_plot_pulse"), dict)
+                and entry["original_plot_pulse"].get("pressure_kind")
+                == pressure_kind
+            )
+            + 1
+        )
+        if stacking_count != expected_stacking_count:
+            budget["stacking_count"] = expected_stacking_count
+            records.append(
+                {
+                    "code": "normalized_plot_stacking_count",
+                    "message": (
+                        "Normalized recoverable PlotPulse stacking_count from "
+                        "the authoritative pressure ledger."
+                    ),
+                    "field_path": "plot_pulse.budget_cost.stacking_count",
+                    "before": stacking_count,
+                    "after": expected_stacking_count,
+                    "policy": "recoverable_derived_audit_metadata_v0.1",
+                }
+            )
+    return normalized, records
 
 
 def _as_repair_required(
@@ -1389,7 +1457,8 @@ def _claim_protocol_ids(
         if identifier in seen_in_object:
             repeated_in_object.add(identifier)
         seen_in_object.add(identifier)
-    used = set(runtime_state.get("used_protocol_ids", []))
+    used = set(runtime_state.get("reserved_protocol_ids", []))
+    used.update(runtime_state.get("used_protocol_ids", []))
     replayed = sorted(repeated_in_object | (set(normalized) & used))
     if replayed:
         return [
@@ -1530,6 +1599,7 @@ def _new_trace(
 ) -> dict[str, Any]:
     return {
         "trace_id": fixture.get("trace_id", "invalid_fixture"),
+        "fixture_sha256": _content_hash(fixture),
         "run_id": run_id,
         "run_nonce": run_nonce,
         "runtime_mode": "world_driven",
@@ -1580,9 +1650,16 @@ def _new_trace(
     }
 
 
-def _finish_trace(trace: dict[str, Any], run_dir: str) -> dict[str, Any]:
+def _finish_trace(
+    trace: dict[str, Any],
+    run_dir: str,
+    *,
+    elapsed_seconds: float | None = None,
+) -> dict[str, Any]:
     blocked = _trace_has_block(trace)
     trace["final_decision"] = "blocked" if blocked or trace.get("runtime_status") != "finished" else "allowed"
+    if elapsed_seconds is not None:
+        trace["elapsed_seconds"] = round(elapsed_seconds, 6)
     summarize_token_usage(trace)
     trace_path = os.path.join(run_dir, "trace.json")
     report_path = os.path.join(run_dir, "report.md")

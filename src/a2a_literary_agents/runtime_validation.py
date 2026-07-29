@@ -593,7 +593,14 @@ def validate_world_fixture(fixture: dict[str, Any] | None) -> list[dict[str, Any
                     f"{field} must be a non-negative integer.",
                 )
             )
-    for field in ["public_canon", "public_event_ledger", "pressure_history", "scheduled_world_events", "world_condition_registry"]:
+    for field in [
+        "public_canon",
+        "public_event_ledger",
+        "pressure_history",
+        "scheduled_world_events",
+        "world_condition_registry",
+        "reserved_protocol_ids",
+    ]:
         value = fixture.get(field, [])
         if not isinstance(value, list):
             violations.append(_block("world_fixture", "invalid_fixture_collection", f"{field} must be a list."))
@@ -653,6 +660,28 @@ def validate_world_fixture(fixture: dict[str, Any] | None) -> list[dict[str, Any
         set(condition_registry)
     ):
         violations.append(_block("world_fixture", "duplicate_world_condition_id", "world_condition_registry ids must be unique."))
+
+    reserved_protocol_ids = fixture.get("reserved_protocol_ids", [])
+    if isinstance(reserved_protocol_ids, list) and not all(
+        is_protocol_id(item) for item in reserved_protocol_ids
+    ):
+        violations.append(
+            _block(
+                "world_fixture",
+                "invalid_reserved_protocol_ids",
+                "reserved_protocol_ids must contain only protocol ids.",
+            )
+        )
+    elif isinstance(reserved_protocol_ids, list) and len(
+        reserved_protocol_ids
+    ) != len(set(reserved_protocol_ids)):
+        violations.append(
+            _block(
+                "world_fixture",
+                "duplicate_reserved_protocol_id",
+                "reserved_protocol_ids must be unique.",
+            )
+        )
 
     observations = fixture.get("visible_observations", {})
     if isinstance(observations, dict):

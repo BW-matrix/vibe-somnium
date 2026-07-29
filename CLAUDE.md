@@ -49,7 +49,7 @@ player/request
 Every creative model-agent receives only projected context. Full system objects are not normal prompt inputs. Judge receives an audit context, but it is not part of literary creation and cannot repair by rewriting content.
 The legacy single-window v0.1 flow remains executable for regression coverage.
 
-Runtime hardening currently includes Kernel-held projection contracts, exact role-and-instance recipient binding, sealed validated-dispatch permits, field- and leaf-complete manifests with stable-id-derived original source indices, pre-write trace-path containment, duplicate source-id rejection, one origin-bound JSON retransmission guarded by deterministic syntax/content conservation before fail-closed quarantine, cross-scene guards, syntax-bounded single-use protocol ids, bounded origin-only World/Character/Narrator semantic repairs, strict Character actor/speech/interiority ownership, separate public membership/encounter/direct-observer memory paths, executable Plot enums, audited recoverable normalization, full projection-evidence public export gating, and explicit published-versus-quarantined narration under scene-atomic commit. Judge-controlled ids never enter creative contexts. Plot has no content or authority repair loop. The full suite currently passes 100 tests and 16 subtests.
+Runtime hardening currently includes Kernel-held projection contracts, exact role-and-instance recipient binding, sealed validated-dispatch permits, field- and leaf-complete manifests with stable-id-derived original source indices, pre-write trace-path containment, duplicate source-id rejection, one origin-bound JSON retransmission guarded by deterministic syntax/content conservation before fail-closed quarantine, cross-scene guards, syntax-bounded single-use protocol ids, bounded origin-only World/Character/Narrator semantic repairs, strict Character actor/speech/interiority ownership, separate public membership/encounter/direct-observer memory paths, executable Plot enums, audited recoverable normalization, full projection-evidence public export gating, explicit published-versus-quarantined narration under scene-atomic commit, and a committed two-scene handoff with full source-fixture hash binding, exact owner-memory allowlisting, conflicting-memory-id rejection, and reservation of both model/runtime and Kernel packet/memory identities. Judge-controlled ids never enter creative contexts. Plot has no content or authority repair loop. The full suite currently passes 107 tests and 16 subtests.
 
 ## Runtime Backends
 
@@ -72,6 +72,7 @@ python scripts/run_trace.py run --fixture fixtures/traces/world_driven_archive_e
 python scripts/run_trace.py run --fixture fixtures/traces/allowed_archive_probe.json --llm-mode mock
 python scripts/run_trace.py run --fixture fixtures/traces/adversarial_narrator_leak.json --llm-mode mock
 python scripts/run_trace.py run --fixture fixtures/traces/adversarial_plot_railroading.json --llm-mode mock
+python scripts/run_two_scene_study.py --scene-one fixtures/traces/world_driven_archive_exchange.json --scene-two-template fixtures/traces/world_driven_dawn_inspection_followup.json --out .local/two-scene-study --llm-mode codex-cli --max-rounds 100
 ```
 
 Codex CLI real backend:
@@ -97,6 +98,7 @@ python scripts/run_trace.py run --fixture fixtures/traces/world_driven_archive_e
 
 - `src/a2a_literary_agents/runner.py`: single-window protocol runner
 - `src/a2a_literary_agents/world_runtime.py`: primary World-driven state machine
+- `src/a2a_literary_agents/campaign_study.py`: committed cross-scene materialization, continuity checks, hashes, and study metrics
 - `src/a2a_literary_agents/world_projection.py`: per-role context construction for World-driven execution
 - `src/a2a_literary_agents/runtime_validation.py`: deterministic identity, route, hash, and authority-envelope guards
 - `src/a2a_literary_agents/visibility.py`: fail-closed event and public-scope membership checks
@@ -107,7 +109,9 @@ python scripts/run_trace.py run --fixture fixtures/traces/world_driven_archive_e
 - `fixtures/traces/`: allowed and adversarial trace fixtures
 - `docs/runner/mvp-runner-v0.1.md`: runner documentation
 - `docs/runner/world-driven-mvp-v0.2.md`: primary runtime operations
-- `docs/runner/world-driven-real-sample-v0.2.md`: sanitized 19-call real-provider evidence with exact usage and no repair or normalization
+- `docs/runner/world-driven-real-sample-v0.2.md`: sanitized 19-call real-provider evidence with exact usage, no agent repair, and one audited recoverable intensity normalization
+- `docs/research/two-scene-continuity-study-v0.3.md`: two-scene continuity, failure, token, and latency evidence
+- `scripts/run_two_scene_study.py`: bounded two-scene real-run harness with optional Scene 1 reuse
 - `scripts/export_public_trace.py`: accepts only successful exact-usage Codex traces with complete per-call field/leaf evidence, contract-bound leaf paths and policy parity, and no blocking validation; it verifies the private packet seal, strips private trace material, and re-seals the public payload
 - `docs/protocol/`: protocol specs
 - `docs/reference/terminology-index-v0.1.md`: canonical terminology
