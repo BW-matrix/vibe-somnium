@@ -12,6 +12,7 @@ if ROOT not in sys.path:
 from scripts.export_public_trace import (
     _assert_sanitized,
     _content_hash,
+    _portable_basename,
     _private_run_replacements,
     _sanitize_and_reseal_scene_packet,
     _scene_packet_payload,
@@ -189,6 +190,11 @@ class PublicTraceExportTests(unittest.TestCase):
         trace = _real_trace()
         private_nonce = trace["run_nonce"]
         private_run_id = trace["run_id"]
+
+        self.assertEqual(
+            _portable_basename(trace["fixture_path"]),
+            "fixture.json",
+        )
 
         document = render_public_trace(trace)
         _assert_sanitized(document, trace)

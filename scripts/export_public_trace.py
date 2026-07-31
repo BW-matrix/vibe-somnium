@@ -7,7 +7,7 @@ import hashlib
 import json
 import re
 from collections import defaultdict
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 
@@ -66,6 +66,11 @@ def _private_run_replacements(trace: dict[str, Any]) -> dict[str, str]:
         if isinstance(private_value, str) and private_value:
             replacements[private_value] = marker
     return replacements
+
+
+def _portable_basename(value: Any) -> str:
+    normalized = str(value or "unknown-fixture").replace("\\", "/")
+    return PurePosixPath(normalized).name or "unknown-fixture"
 
 
 def _sanitize_public_value(
@@ -473,7 +478,7 @@ def render_public_trace(trace: dict[str, Any]) -> str:
         aggregate[agent_name]["total"] += int(usage["total"])
 
     replacements = _private_run_replacements(trace)
-    fixture_name = Path(str(trace.get("fixture_path", "unknown-fixture"))).name
+    fixture_name = _portable_basename(trace.get("fixture_path"))
     transaction = _sanitize_public_value(trace.get("transaction") or {}, replacements)
     scene_packet = _sanitize_and_reseal_scene_packet(trace["scene_packet"], replacements)
     lines = [
