@@ -2,7 +2,13 @@
 
 This document is the first protocol draft for `vibe-somnium / 织梦`.
 
-目标不是一次性定死全部实现，而是先给系统一个足够清晰的 law layer，让 agent swarm 不会重新塌回 hidden single-author mode。
+Its purpose is not to freeze every implementation detail, but to provide a sufficiently clear law layer so the agent swarm does not collapse back into a hidden single-author mode.
+
+Runtime status:
+
+- the six-column matrix below is the conceptual authority baseline
+- [world-driven-runtime-v0.1](world-driven-runtime-v0.1.md) is the normative executable v0.2 profile
+- executable v0.2 decomposes the legacy `Orchestrator` umbrella into `Runtime Kernel`, `Router Agent`, and `Authority Judge`
 
 ## Protocol Axioms
 
@@ -42,7 +48,7 @@ Important context rule:
 
 ## Event Bus Policy
 
-`event bus` should use a soft-validation pipeline. 格式错误不应该直接导致整轮崩掉，更不应该让系统因为小字段缺失而自杀。
+`event bus` should use a soft-validation pipeline. A format error should not crash the entire scene, and a minor recoverable field omission should not make the system destroy its own progress.
 
 Recommended pipeline:
 
@@ -61,6 +67,8 @@ The important distinction is:
 - `security-critical field failure` is treated like a permission risk, not like a harmless schema typo
 
 Recoverable fields may be normalized when safe. Security-critical fields such as `sender`, `message_type`, `visibility`, `target`, `authority_basis`, and `authorized_interiority.scope_limit` should not be guessed from literary convenience.
+
+Malformed JSON shapes also fail closed at the message boundary. A validator may quarantine one unusable subject and preserve the rest of the transaction, but it must not throw an uncaught type/key error or reinterpret a scalar as an object. Protocol identifiers are security-relevant strings: executable v0.2 accepts only `^[A-Za-z][A-Za-z0-9_.:-]{0,127}$`, checks uniqueness and replay, and never forwards a model-controlled Judge identifier as creative context.
 
 ## Message Envelope v0.1
 
@@ -87,6 +95,10 @@ Every routed message should try to include the following fields:
 | `scene_public` | Visible to all agents legitimately participating in the scene |
 | `system_restricted` | Reserved for routing, canon review, or validation layers |
 
+Executable visibility records also require a concrete `scope_ref`. `scene_public` binds to the current scene and its explicit participant registry. Local, institutional, city, and realm public scopes bind to registered scope instances and membership lists; a scope label alone never grants access.
+
+`private_self` is owner-bound: its sole observer and `scope_ref` must equal the event's primary actor. `scene_pair` is participant-bound: it names exactly two unique current scene participants and contains every event actor. A syntactically valid scope name with the wrong owner or membership is an authority violation, not a repairable formatting warning.
+
 Important rule:
 
 - raw inner intention stays in `private_self`
@@ -94,7 +106,7 @@ Important rule:
 
 ## Dramatic Window Rule
 
-系统默认不按“每一句台词”调度，而按 `dramatic window` 调度。
+The default scheduler uses a `dramatic window`, not one protocol cycle per individual line.
 
 A dramatic window is a bounded unit of interaction that may contain:
 
@@ -126,7 +138,7 @@ Suggested critical triggers:
 | --- | --- | --- |
 | `Immutable Canon` | Fundamental world law, hard history anchors, core role definitions | No routine agent |
 | `Latent Canon` | Already true but not yet revealed facts | Not changed during scene play; only revealed when valid |
-| `Emergent Canon` | Origin/provenance for new facts allowed to grow during writing | `Canon Steward` after review; visibility assigned separately |
+| `canon_origin = emergent` | Provenance for new facts allowed to grow during writing | `Canon Steward` after review; visibility and stability assigned on separate axes |
 
 For the complementary storage model covering `world_state_ledger`, `public_event_ledger`, and `private_memory`, see [state-and-knowledge-layers-v0.1](state-and-knowledge-layers-v0.1.md).
 
@@ -143,10 +155,22 @@ This prevents:
 
 For the concrete world-side commit sequence, see [resolution-state-delta-commit-pipeline-v0.1](resolution-state-delta-commit-pipeline-v0.1.md).
 
-## Open Questions for v0.2
+Executable v0.2 applies an atomic scene transaction: accepted events remain working state until successful `finish_scene`. Any later authority, narration, pressure-disposition, budget, or sealing failure rolls back all outward world state, packet facts, and memory handoff.
 
-1. How to test field-level projection with adversarial fixtures
-2. Whether `DialogueWindow` should contain candidate lines or only speech acts in high-risk scenes
-3. How much of private cognition may be selectively exposed to narrator in close POV modes
-4. How scene packets should be summarized for long-form memory retention
-5. How public-scope membership should be modeled for `public_event_ledger` queries
+## Executable Coordination Decomposition
+
+| Component | Executable authority | Forbidden authority |
+| --- | --- | --- |
+| `Runtime Kernel` | deterministic schema validation, projection, scheduling, identity registry, transaction, sealing, and trace | semantic judgment, literary rewriting, choice, consequence, or prose |
+| `Router Agent` | exact request-to-declared-owner binding | context invention, choice advice, or consequence |
+| `Authority Judge` | semantic authority, grounding, visibility, and overreach review | subject rewriting, replacement content, state mutation, or prose |
+
+Every Authority approval binds the exact subject hash, critical reviewed fields, non-empty authority basis, random run nonce, and audit-context hash. Missing bindings fail closed.
+
+## Current Open Questions
+
+1. Whether future high-risk dialogue should forbid candidate lines and permit only semantic speech acts
+2. How to calibrate semantic Judge reliability beyond one independent model call
+3. How scene packets should be summarized for long-form memory retention without projection laundering
+4. How scope membership and pressure budgets should persist across scenes
+5. How publication and canon governance should execute inside the live World loop

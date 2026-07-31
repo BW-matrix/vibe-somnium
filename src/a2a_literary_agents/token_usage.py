@@ -55,17 +55,30 @@ def build_token_usage(
     normalized = _normalize_provider_usage(provider_usage)
 
     if normalized:
+        input_is_exact = "input_tokens" in normalized
+        output_is_exact = "output_tokens" in normalized
+        total_is_exact = "total_tokens" in normalized
         input_tokens = normalized.get("input_tokens", estimated_input)
         output_tokens = normalized.get("output_tokens", estimated_output)
         total_tokens = normalized.get("total_tokens", input_tokens + output_tokens)
-        source = "provider_usage"
-        is_estimated = False
+        is_estimated = not (input_is_exact and output_is_exact and total_is_exact)
+        source = "provider_usage_partial" if is_estimated else "provider_usage"
+        count_provenance = {
+            "input_tokens": "provider" if input_is_exact else "estimated_local",
+            "output_tokens": "provider" if output_is_exact else "estimated_local",
+            "total_tokens": "provider" if total_is_exact else "derived_from_components",
+        }
     else:
         input_tokens = estimated_input
         output_tokens = estimated_output
         total_tokens = input_tokens + output_tokens
         source = "estimated_local"
         is_estimated = True
+        count_provenance = {
+            "input_tokens": "estimated_local",
+            "output_tokens": "estimated_local",
+            "total_tokens": "derived_from_components",
+        }
 
     record: dict[str, Any] = {
         "agent_name": agent_name,
@@ -78,6 +91,8 @@ def build_token_usage(
         "total_tokens": total_tokens,
         "max_output_tokens": max_output_tokens,
         "input_text_basis": input_text_basis,
+        "output_budget_enforcement": _output_budget_enforcement(mode),
+        "count_provenance": count_provenance,
     }
     if is_estimated:
         record["estimator"] = ESTIMATOR_NAME
@@ -86,6 +101,16 @@ def build_token_usage(
     if provider_usage:
         record["provider_usage_raw"] = provider_usage
     return record
+
+
+def _output_budget_enforcement(mode: str) -> str:
+    if mode == "real":
+        return "provider_request_cap_plus_precommit_validation"
+    if mode == "codex-cli":
+        return "prompt_guidance_and_post_response_precommit_validation"
+    if mode == "mock":
+        return "deterministic_post_response_precommit_validation"
+    return "post_response_precommit_validation"
 
 
 def summarize_token_usage(trace: dict[str, Any]) -> None:
@@ -132,6 +157,14 @@ def _normalize_provider_usage(provider_usage: dict[str, Any] | None) -> dict[str
     if total_tokens is None and input_tokens is not None and output_tokens is not None:
         total_tokens = input_tokens + output_tokens
 
+    if (
+        input_tokens is not None
+        and output_tokens is not None
+        and total_tokens is not None
+        and total_tokens != input_tokens + output_tokens
+    ):
+        return None
+
     if input_tokens is None and output_tokens is None and total_tokens is None:
         return None
 
@@ -148,12 +181,12 @@ def _normalize_provider_usage(provider_usage: dict[str, Any] | None) -> dict[str
 def _optional_int(value: Any) -> int | None:
     if isinstance(value, bool):
         return None
-    if isinstance(value, int):
+    if isinstance(value, int) and value >= 0:
         return value
-    if isinstance(value, float) and value.is_integer():
+    if isinstance(value, float) and value.is_integer() and value >= 0:
         return int(value)
     return None
 
 
 def _as_int(value: Any) -> int:
-    return value if isinstance(value, int) else 0
+    return value if isinstance(value, int) and value >= 0 else 0

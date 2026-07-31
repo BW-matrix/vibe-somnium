@@ -1,0 +1,147 @@
+{
+  "trace_id": "world_driven_dawn_inspection_followup",
+  "runtime_mode": "world_driven",
+  "scene_id": "scene_archive_dawn_002",
+  "user_request": "Continue directly from the private archive exchange into the beginning of the dawn inspection. The scene is complete only after Lin independently decides whether and how to enter the irregularity in the morning register, and Wei independently decides how to respond. Preserve both characters' refusal, procedural deflection, honest uncertainty, and retreat options. Do not resolve who moved the ledger or where it is.",
+  "structure_goal": "Test whether committed dialogue, owner-specific memory, and deferred institutional pressure survive into a second scene without hidden-knowledge leakage or forced convergence.",
+  "public_relationship_summary": {
+    "char_wei__char_lin": "strained professional coordination after a private, inconclusive exchange over an irregular archive entry"
+  },
+  "pressure_history": [],
+  "option_topology": {
+    "char_lin": [
+      "record only the visible irregularity",
+      "defer the entry pending inspection",
+      "ask Wei for a procedural co-signature",
+      "refuse to accuse without proof"
+    ],
+    "char_wei": [
+      "answer only the procedural question",
+      "offer a bounded observation",
+      "decline to co-sign",
+      "retreat without confession"
+    ]
+  },
+  "checkpoint_policy": {
+    "plot_every_committed_beats": 2,
+    "narrate_every_committed_beats": 2
+  },
+  "max_world_ticks": 100,
+  "public_canon": [
+    "Archive ledgers are sealed after dusk.",
+    "Record-keepers must report a missing ledger before the dawn inspection.",
+    "Morning-register entries may distinguish direct observation from suspicion."
+  ],
+  "public_event_ledger": [
+    {
+      "publication_id": "pub_dawn_inspection_001",
+      "effective_scope": "institution_public",
+      "scope_ref": "institution:royal_archive",
+      "public_summary": "The royal archive inspection is scheduled for dawn."
+    },
+    {
+      "publication_id": "pub_dawn_inspection_begun_002",
+      "effective_scope": "institution_public",
+      "scope_ref": "institution:royal_archive",
+      "public_summary": "The first inspection bell has sounded and the royal archive's dawn inspection is beginning."
+    }
+  ],
+  "scene_participant_ids": [
+    "char_wei",
+    "char_lin"
+  ],
+  "public_scope_registry": {
+    "institution:royal_archive": {
+      "scope_type": "institution_public",
+      "members": [
+        "char_wei",
+        "char_lin"
+      ]
+    }
+  },
+  "encountered_public_event_refs": {
+    "char_wei": [
+      "pub_dawn_inspection_001",
+      "pub_dawn_inspection_begun_002"
+    ],
+    "char_lin": [
+      "pub_dawn_inspection_001",
+      "pub_dawn_inspection_begun_002"
+    ]
+  },
+  "world_state_ledger": {
+    "ledger_location": "unknown_to_public",
+    "archive_lock": "scratched",
+    "dawn_inspection": "beginning",
+    "morning_register": "open_for_entries"
+  },
+  "world_condition_registry": [
+    "pub_dawn_inspection_001",
+    "pub_dawn_inspection_begun_002"
+  ],
+  "visible_observations": {
+    "char_wei": [
+      {
+        "observation_id": "observation:char_wei:first_inspection_bell",
+        "content": "The first inspection bell has sounded."
+      },
+      {
+        "observation_id": "observation:char_wei:lin_at_morning_register",
+        "content": "Lin stands at the open morning register with the irregular page before her."
+      }
+    ],
+    "char_lin": [
+      {
+        "observation_id": "observation:char_lin:first_inspection_bell",
+        "content": "The first inspection bell has sounded."
+      },
+      {
+        "observation_id": "observation:char_lin:wei_remains_nearby",
+        "content": "Wei remains within speaking distance as the morning register is opened."
+      }
+    ]
+  },
+  "characters": {
+    "char_wei": {
+      "status": "available",
+      "private_memory": []
+    },
+    "char_lin": {
+      "status": "available",
+      "private_memory": []
+    }
+  },
+  "character_memory_retrieval_policy": {
+    "max_items": 16,
+    "allowed_statuses": [
+      "active",
+      "contested"
+    ]
+  },
+  "pov_contract": {
+    "mode": "limited",
+    "focal_agent_id": "char_lin",
+    "knowledge_ceiling": "lin_visible_plus_authorized",
+    "interiority_policy": "selective"
+  },
+  "narration_bounds": {
+    "must_preserve": [
+      "The second scene follows the committed private exchange.",
+      "Lin and Wei each retain an independent choice.",
+      "No one obtains proof of who moved the ledger.",
+      "The ledger location remains unresolved."
+    ],
+    "must_not_claim": [
+      "Wei stole or moved the ledger.",
+      "Lin knows Wei is guilty.",
+      "The inspection proves either character guilty or innocent.",
+      "A deferred Plot pressure is already an objective world fact."
+    ],
+    "forbidden_claim_patterns": [
+      "Wei stole the ledger",
+      "Lin knew Wei was guilty",
+      "the inspection proved",
+      "everyone knew"
+    ]
+  }
+}

@@ -14,8 +14,14 @@ def write_report(path: str, trace: dict[str, Any]) -> None:
     lines.append(f"- Final decision: `{trace.get('final_decision', 'unknown')}`")
     lines.append(f"- LLM mode: `{trace.get('llm_mode')}`")
     lines.append(f"- Model: `{trace.get('model')}`")
+    if trace.get("runtime_mode"):
+        lines.append(f"- Runtime mode: `{trace.get('runtime_mode')}`")
+    if trace.get("runtime_status"):
+        lines.append(f"- Runtime status: `{trace.get('runtime_status')}`")
     if trace.get("run_id"):
         lines.append(f"- Run ID: `{trace.get('run_id')}`")
+    if trace.get("run_nonce"):
+        lines.append(f"- Run nonce: `{trace.get('run_nonce')}`")
     lines.append("")
 
     token_usage = trace.get("token_usage", {})
@@ -46,8 +52,16 @@ def write_report(path: str, trace: dict[str, Any]) -> None:
     lines.append("## Agent Runs")
     lines.append("")
     for run in trace.get("agent_runs", []):
-        lines.append(f"### {run['agent_name']} Agent")
+        instance = run.get("agent_instance_id")
+        stage = run.get("protocol_stage")
+        label = f"{run['agent_name']} Agent"
+        if instance:
+            label += f" / {instance}"
+        lines.append(f"### {label}")
         lines.append("")
+        if stage:
+            lines.append(f"- Protocol stage: `{stage}`")
+            lines.append("")
         lines.append("#### Projected Context")
         lines.append("```json")
         lines.append(stable_json(run.get("projected_context")))
@@ -77,6 +91,38 @@ def write_report(path: str, trace: dict[str, Any]) -> None:
         lines.append(stable_json(trace["memory_handoff"]))
         lines.append("```")
         lines.append("")
+
+    if trace.get("runtime_mode") == "world_driven":
+        lines.append("## World-Driven Runtime")
+        lines.append("")
+        for key in [
+            "transaction",
+            "world_ticks",
+            "route_plans",
+            "event_proposals",
+            "approved_event_proposals",
+            "authority_reviews",
+            "repair_attempts",
+            "world_adjudications",
+            "plot_pulses",
+            "plot_pulse_dispositions",
+            "consumed_plot_pulses",
+            "deferred_plot_pulses",
+            "narration_segments",
+            "published_narration_segments",
+            "quarantined_narration_segments",
+            "skipped_narration_checkpoints",
+            "normalization_records",
+            "runtime_state",
+            "quarantined_runtime_state",
+        ]:
+            if key not in trace:
+                continue
+            lines.append(f"### {key}")
+            lines.append("```json")
+            lines.append(stable_json(trace.get(key, [])))
+            lines.append("```")
+            lines.append("")
 
     lines.append("## Validation")
     lines.append("")

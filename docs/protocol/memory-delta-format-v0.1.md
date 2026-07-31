@@ -71,7 +71,8 @@ The fields below describe the delta payload.
 | `delta_id` | yes | string | stable id for this memory update |
 | `owner_agent_id` | yes | string | whose `private_memory` this delta belongs to |
 | `writer_role` | yes | string | which role authored the delta |
-| `source_packet_id` | recommended | string | which committed `ScenePacket` this delta came from |
+| `source_packet_id` | yes in executable v0.2 | string | which committed `ScenePacket` this delta came from |
+| `source_event_id` | yes in executable v0.2 | string | which visibility-backed committed event produced this delta |
 | `delta_kind` | yes | string | what type of memory update this is |
 | `acquisition_mode` | yes | string | how the owner came to hold this memory |
 | `content` | yes | string | the memory content itself |
@@ -80,6 +81,8 @@ The fields below describe the delta payload.
 | `retention` | optional | string | fleeting, scene, chapter, long_term, persistent |
 | `supersedes` | optional | array | which earlier deltas this update supersedes or revises |
 | `based_on` | recommended | array | causal or evidentiary refs for this delta |
+
+The current World-driven handoff emits `acquisition_mode = direct_observation` only when the owner passes deterministic event visibility checks. It never copies a full packet into memory.
 
 ## `delta_kind`
 
@@ -250,8 +253,8 @@ This document should be read together with:
 - `scene-packet-to-memory-handoff-v0.1.md`
 - `agent-context-packet-and-field-visibility-v0.1.md`
 
-Next protocol priority after this document:
+Current executable status:
 
-1. memory retrieval policy for `CharacterContextPacket`
-2. adversarial trace fixtures for divergent memory and mistaken inference
-3. dialogue evaluation metrics after context assembly is stable
+1. owner-only Character memory retrieval with status filtering, salience/recency ranking, a hard cap, and exclusion audit is implemented
+2. packet-to-memory projection remains visibility-bound and scene-atomic
+3. remaining work is persistent contradiction handling, decay/retention, and controlled long-form summarization

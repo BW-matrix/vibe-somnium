@@ -33,16 +33,34 @@ class AgentCompletion:
 
 
 class AgentProvider:
-    def complete(self, agent_name: str, prompt: str, fixture: dict[str, Any]) -> AgentCompletion:
+    def complete(
+        self,
+        agent_name: str,
+        prompt: str,
+        fixture: dict[str, Any],
+        runtime_bindings: dict[str, str] | None = None,
+    ) -> AgentCompletion:
         raise NotImplementedError
 
 
 class MockAgentProvider(AgentProvider):
     def __init__(self, config: RunnerConfig | None = None):
         self.config = config or RunnerConfig(llm_mode="mock", model="mock")
+        self.call_counts: dict[str, int] = {}
 
-    def complete(self, agent_name: str, prompt: str, fixture: dict[str, Any]) -> AgentCompletion:
+    def complete(
+        self,
+        agent_name: str,
+        prompt: str,
+        fixture: dict[str, Any],
+        runtime_bindings: dict[str, str] | None = None,
+    ) -> AgentCompletion:
         output = fixture.get("mock_agent_outputs", {}).get(agent_name)
+        if isinstance(output, list):
+            call_index = self.call_counts.get(agent_name, 0)
+            self.call_counts[agent_name] = call_index + 1
+            output = output[call_index] if call_index < len(output) else None
+        output = _resolve_mock_bindings(output, runtime_bindings or {})
         if output is None:
             output = {
                 "agent": agent_name,
@@ -73,7 +91,13 @@ class OpenAICompatibleAgentProvider(AgentProvider):
         self.config = config
         self.calls_made = 0
 
-    def complete(self, agent_name: str, prompt: str, fixture: dict[str, Any]) -> AgentCompletion:
+    def complete(
+        self,
+        agent_name: str,
+        prompt: str,
+        fixture: dict[str, Any],
+        runtime_bindings: dict[str, str] | None = None,
+    ) -> AgentCompletion:
         if not self.config.api_key:
             return AgentCompletion(
                 agent_name=agent_name,
@@ -161,7 +185,13 @@ class CodexCliAgentProvider(AgentProvider):
         self.config = config
         self.calls_made = 0
 
-    def complete(self, agent_name: str, prompt: str, fixture: dict[str, Any]) -> AgentCompletion:
+    def complete(
+        self,
+        agent_name: str,
+        prompt: str,
+        fixture: dict[str, Any],
+        runtime_bindings: dict[str, str] | None = None,
+    ) -> AgentCompletion:
         if self.calls_made >= self.config.max_llm_calls_per_trace:
             return AgentCompletion(
                 agent_name=agent_name,
@@ -176,6 +206,20 @@ class CodexCliAgentProvider(AgentProvider):
         os.makedirs(self.config.codex_home, exist_ok=True)
         os.makedirs(self.config.codex_workdir, exist_ok=True)
 
+        try:
+            reasoning_effort = _normalize_codex_reasoning_effort(
+                self.config.codex_reasoning_effort
+            )
+        except ValueError as exc:
+            return AgentCompletion(
+                agent_name=agent_name,
+                mode="codex-cli",
+                prompt=prompt,
+                raw_output="",
+                parsed_output=None,
+                error=f"invalid_codex_reasoning_effort: {exc}",
+            )
+
         with tempfile.TemporaryDirectory(prefix=f"a2a_codex_{agent_name}_") as tmp:
             output_path = os.path.join(tmp, "last-message.json")
 
@@ -188,6 +232,19 @@ class CodexCliAgentProvider(AgentProvider):
                 "read-only",
                 "-c",
                 "approval_policy=\"never\"",
+                "-c",
+                f"model_reasoning_effort=\"{reasoning_effort}\"",
+                "-c",
+                "web_search=\"disabled\"",
+                "-c",
+                "shell_environment_policy.inherit=\"none\"",
+                "-c",
+                "shell_environment_policy.ignore_default_excludes=false",
+                "-c",
+                "allow_login_shell=false",
+                "--disable",
+                "shell_tool",
+                "--strict-config",
                 "--ephemeral",
                 "--ignore-rules",
                 "--ignore-user-config",
@@ -260,18 +317,18 @@ class AutoAgentProvider(AgentProvider):
         self.mock = MockAgentProvider(config)
         self.has_key = bool(config.api_key)
 
-    def complete(self, agent_name: str, prompt: str, fixture: dict[str, Any]) -> AgentCompletion:
+    def complete(
+        self,
+        agent_name: str,
+        prompt: str,
+        fixture: dict[str, Any],
+        runtime_bindings: dict[str, str] | None = None,
+    ) -> AgentCompletion:
         if not self.has_key:
-            return self.mock.complete(agent_name, prompt, fixture)
-        result = self.real.complete(agent_name, prompt, fixture)
-        if result.error:
-            fallback = self.mock.complete(agent_name, prompt, fixture)
-            fallback.mode = "mock_fallback"
-            fallback.error = f"real_failed: {result.error}"
-            if fallback.token_usage:
-                fallback.token_usage["mode"] = "mock_fallback"
-            return fallback
-        return result
+            return self.mock.complete(agent_name, prompt, fixture, runtime_bindings)
+        # Mixing real and fixture outputs mid-trace breaks call ordering and can
+        # launder a provider failure into an apparently valid protocol result.
+        return self.real.complete(agent_name, prompt, fixture, runtime_bindings)
 
 
 def build_provider(config: RunnerConfig) -> AgentProvider:
@@ -290,6 +347,17 @@ def _generic_json_object_schema() -> dict[str, Any]:
     return {"type": "object", "additionalProperties": True}
 
 
+def _normalize_codex_reasoning_effort(value: str) -> str:
+    normalized = value.strip().lower() if isinstance(value, str) else ""
+    if normalized == "max":
+        return "xhigh"
+    if normalized in {"none", "minimal", "low", "medium", "high", "xhigh"}:
+        return normalized
+    raise ValueError(
+        "expected max, none, minimal, low, medium, high, or xhigh"
+    )
+
+
 def _codex_cli_prompt(agent_name: str, prompt: str, max_output_tokens: int) -> str:
     return (
         "You are being called as a headless model backend for a2a-literary-agents.\n"
@@ -302,11 +370,38 @@ def _codex_cli_prompt(agent_name: str, prompt: str, max_output_tokens: int) -> s
 
 
 def _isolated_codex_env(codex_home: str) -> dict[str, str]:
-    env = dict(os.environ)
-    env["CODEX_HOME"] = codex_home
+    # The model backend must not inherit API keys, GitHub tokens, or arbitrary
+    # application secrets from the parent runner. Codex auth comes only from
+    # the dedicated CODEX_HOME; shell tools are disabled separately.
+    safe_parent_keys = {
+        "COMSPEC",
+        "NUMBER_OF_PROCESSORS",
+        "OS",
+        "PATH",
+        "PATHEXT",
+        "PROCESSOR_ARCHITECTURE",
+        "SYSTEMDRIVE",
+        "SYSTEMROOT",
+        "TEMP",
+        "TMP",
+        "WINDIR",
+    }
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key.upper() in safe_parent_keys and isinstance(value, str)
+    }
+    isolated_home = os.path.abspath(codex_home)
+    isolated_appdata = os.path.join(isolated_home, "AppData", "Roaming")
+    isolated_localappdata = os.path.join(isolated_home, "AppData", "Local")
+    os.makedirs(isolated_appdata, exist_ok=True)
+    os.makedirs(isolated_localappdata, exist_ok=True)
+    env["CODEX_HOME"] = isolated_home
+    env["HOME"] = isolated_home
+    env["USERPROFILE"] = isolated_home
+    env["APPDATA"] = isolated_appdata
+    env["LOCALAPPDATA"] = isolated_localappdata
     env["NO_COLOR"] = "1"
-    for key in ["CODEX_THREAD_ID", "CODEX_INTERNAL_ORIGINATOR_OVERRIDE", "CODEX_SHELL"]:
-        env.pop(key, None)
     return env
 
 
@@ -316,6 +411,20 @@ def _read_text_if_exists(path: str) -> str:
             return f.read().strip()
     except OSError:
         return ""
+
+
+def _resolve_mock_bindings(value: Any, bindings: dict[str, str]) -> Any:
+    """Resolve explicit fixture placeholders that model an Agent echoing run data."""
+
+    if isinstance(value, dict):
+        return {key: _resolve_mock_bindings(item, bindings) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_resolve_mock_bindings(item, bindings) for item in value]
+    if isinstance(value, str) and value.startswith("$"):
+        binding = bindings.get(value[1:])
+        if binding is not None:
+            return binding
+    return value
 
 
 def _usage_from_codex_jsonl(stdout: str) -> dict[str, Any] | None:

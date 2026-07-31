@@ -9,12 +9,14 @@ from pathlib import Path
 
 
 DEFAULT_AGENT_OUTPUT_TOKENS = {
-    "plot": 2000,
-    "character": 4000,
-    "world": 5000,
-    "narrator": 6000,
-    "canon_steward": 3000,
-    "judge": 3000,
+    "plot": 12000,
+    "character": 16000,
+    "world": 24000,
+    "router": 12000,
+    "authority": 24000,
+    "narrator": 16000,
+    "canon_steward": 16000,
+    "judge": 24000,
 }
 
 
@@ -28,10 +30,11 @@ class RunnerConfig:
     codex_binary: str = "codex"
     codex_home: str = ""
     codex_workdir: str = ""
-    max_llm_calls_per_trace: int = 8
-    total_output_token_budget: int = 35000
+    codex_reasoning_effort: str = "max"
+    max_llm_calls_per_trace: int = 24
+    total_output_token_budget: int = 300000
     per_agent_max_output_tokens: dict[str, int] = field(default_factory=lambda: dict(DEFAULT_AGENT_OUTPUT_TOKENS))
-    timeout_seconds: int = 60
+    timeout_seconds: int = 240
     temperature: float = 0.4
     token_field: str = "max_tokens"
 
@@ -59,10 +62,11 @@ class RunnerConfig:
             codex_binary=os.environ.get("A2A_CODEX_BINARY", "codex"),
             codex_home=os.environ.get("A2A_CODEX_HOME") or str(_repo_root() / ".local" / "codex-cli-home"),
             codex_workdir=os.environ.get("A2A_CODEX_WORKDIR") or str(_repo_root() / ".local" / "codex-cli-workdir"),
-            max_llm_calls_per_trace=int(os.environ.get("A2A_MAX_LLM_CALLS_PER_TRACE", "8")),
-            total_output_token_budget=int(os.environ.get("A2A_TOTAL_OUTPUT_TOKEN_BUDGET", "35000")),
+            codex_reasoning_effort=os.environ.get("A2A_CODEX_REASONING_EFFORT", "max"),
+            max_llm_calls_per_trace=int(os.environ.get("A2A_MAX_LLM_CALLS_PER_TRACE", "24")),
+            total_output_token_budget=int(os.environ.get("A2A_TOTAL_OUTPUT_TOKEN_BUDGET", "300000")),
             per_agent_max_output_tokens=tokens,
-            timeout_seconds=int(os.environ.get("A2A_LLM_TIMEOUT_SECONDS", "60")),
+            timeout_seconds=int(os.environ.get("A2A_LLM_TIMEOUT_SECONDS", "240")),
             temperature=float(os.environ.get("A2A_LLM_TEMPERATURE", "0.4")),
             token_field=os.environ.get("A2A_LLM_TOKEN_FIELD", "max_tokens"),
         )

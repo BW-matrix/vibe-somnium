@@ -227,8 +227,8 @@ This document should be read together with:
 - `memory-delta-format-v0.1.md`
 - `resolution-state-delta-commit-pipeline-v0.1.md`
 
-Next protocol priority after this document:
+Current executable status:
 
-1. public scope registry and audience membership model
-2. adversarial trace fixtures for false public reports and over-broad publication
-3. memory retrieval and encounter policy for published events
+1. concrete public-scope membership and encounter-gated Character projection are implemented
+2. candidate isolation and over-broad scope checks are covered by adversarial tests
+3. remaining work is in-loop publication approval, rumor/contestability propagation, and persistent cross-scene membership

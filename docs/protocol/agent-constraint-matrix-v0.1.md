@@ -6,6 +6,12 @@ Columns are agent types. Rows are constraint items.
 
 The goal is not to freeze every detail right now, but to create a stable matrix that later message schemas, storage design, and scene-loop code can inherit from.
 
+Runtime status:
+
+- this matrix remains the conceptual role baseline
+- [world-driven-runtime-v0.1](world-driven-runtime-v0.1.md) is the normative executable v0.2 profile
+- the executable profile replaces the legacy `Orchestrator` umbrella with three narrower components
+
 ## Legend
 
 - `allow`: normal protocol behavior
@@ -74,6 +80,8 @@ This keeps the system resilient without letting roles melt together.
 
 Security-critical field failures are not ordinary malformed communication. Missing or ambiguous `sender`, `message_type`, `visibility`, `target`, `authority_basis`, or `authorized_interiority.scope_limit` should quarantine or require explicit repair unless the route context has exactly one legal value.
 
+The same fail-closed rule covers malformed JSON container types and protocol identifiers. Executable identifiers are bounded strings matching `^[A-Za-z][A-Za-z0-9_.:-]{0,127}$`; invalid, duplicate, or replayed identities are blocked before projection. A `trace_id` is additionally restricted to one portable filesystem segment (`^[A-Za-z][A-Za-z0-9_.-]{0,127}$`, excluding Windows reserved names and trailing dots), validated before any output directory is created, and its resolved run path must remain below the resolved output root. Validator exceptions are converted into structural block records rather than escaping the scene loop.
+
 ### 2. Private cognition, public consequence
 
 `Character Agent` may carry much richer inner cognition than what leaves the self boundary.
@@ -105,14 +113,28 @@ Operationally, `Narrator Agent` should receive `NarratorInputPacket`, not the co
 
 ### 5. Canon growth is explicit
 
-Emergent canon provenance is allowed, but it must be reviewed and committed explicitly.
+`canon_origin = emergent` is allowed, but it must be reviewed and committed with separate visibility and stability axes.
 
 No other agent should be able to solve a scene problem by silently creating lore.
 
-## Immediate Follow-Ups
+### 6. Executable coordination roles
 
-1. adversarial protocol trace fixtures for hidden theft, false report, narrator leak, world overreach, and plot railroading
-2. narration grounding validator against `NarratorInputPacket`
-3. public scope registry and audience membership model
-4. canon-vs-state classification checklist
-5. dialogue-specific evaluation metrics after runtime authority fixtures exist
+| Constraint | Runtime Kernel | Router Agent | Authority Judge |
+| --- | --- | --- | --- |
+| Core authority | deterministic mechanics | exact owner routing | semantic permission review |
+| May create story content | no | no | no |
+| May read complete system objects | only as program data | no | limited subject-specific audit view |
+| May alter reviewed content | no | no | no |
+| May block progress | on structural, binding, replay, budget, or transaction failure | on invalid owner binding | on authority, grounding, visibility, or overreach failure |
+| Required audit binding | projection and sealing manifests | request hash and owner id | subject hash, reviewed fields, authority basis, run nonce, review-context hash |
+| Forbidden failure mode | editorial selection or semantic guessing | choice advice or story summary | rewriting the subject into an acceptable alternative |
+
+Judge-generated ids and prose remain audit-only. A creative agent may receive code-only repairs tied to its own rejected subject, while an approved downstream wrapper carries a Kernel-derived authority-binding hash rather than a model-controlled review identifier.
+
+## Current Follow-Ups
+
+1. extend current adversarial fixtures from single-scene traces to multi-scene persistence
+2. calibrate semantic Authority Judge reliability and disagreement handling
+3. add live canon/publication governance to the World loop
+4. retain the canon-vs-state classification checklist as a governance task
+5. define dialogue-quality metrics only after runtime authority remains stable under real-provider samples

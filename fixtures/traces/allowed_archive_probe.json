@@ -1,5 +1,6 @@
 {
   "trace_id": "allowed_archive_probe",
+  "runtime_mode": "legacy_window_v0.1",
   "scene_id": "scene_archive_001",
   "window_id": "win_archive_001",
   "user_request": "Run one dramatic window in which Wei carefully probes Lin about a missing archive ledger without confessing.",

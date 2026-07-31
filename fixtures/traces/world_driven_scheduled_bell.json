@@ -1,0 +1,252 @@
+{
+  "trace_id": "world_driven_scheduled_bell",
+  "runtime_mode": "world_driven",
+  "scene_id": "scene_archive_dawn_001",
+  "user_request": "Advance the archive from the last quiet minute into dawn.",
+  "max_world_ticks": 2,
+  "checkpoint_policy": {
+    "plot_every_committed_beats": 0,
+    "narrate_every_committed_beats": 1
+  },
+  "world_state_ledger": {
+    "clock_state": "dawn_due",
+    "archive_state": "sealed_until_dawn_bell"
+  },
+  "public_canon": [
+    "The archive opens when the first dawn bell sounds."
+  ],
+  "public_event_ledger": [],
+  "scheduled_world_events": [
+    {
+      "schedule_id": "sched_dawn_bell_001",
+      "trigger_condition": "world_state_ledger.clock_state == dawn_due",
+      "event_kind": "institutional_clock_signal",
+      "authorized_effects": [
+        "the first dawn bell sounds",
+        "the archive changes from sealed to opening"
+      ],
+      "authority_basis": [
+        "public canon dawn-opening rule",
+        "objective clock state"
+      ]
+    }
+  ],
+  "characters": {
+    "char_lin": {
+      "status": "available",
+      "private_memory": []
+    }
+  },
+  "scene_participant_ids": [
+    "char_lin"
+  ],
+  "visible_observations": {
+    "char_lin": []
+  },
+  "encountered_public_event_refs": {
+    "char_lin": []
+  },
+  "public_scope_registry": {},
+  "pov_contract": {
+    "mode": "limited",
+    "focal_agent_id": "char_lin",
+    "knowledge_ceiling": "lin_visible_plus_authorized",
+    "interiority_policy": "none"
+  },
+  "narration_bounds": {
+    "forbidden_claim_patterns": [
+      "Lin knew who rang the bell"
+    ]
+  },
+  "mock_agent_outputs": {
+    "world": [
+      {
+        "world_tick_result": {
+          "message_type": "WorldTickResult",
+          "scene_id": "scene_archive_dawn_001",
+          "tick_id": "wt_dawn_000",
+          "tick_index": 0,
+          "consumed_input_refs": [
+            "sched_dawn_bell_001"
+          ],
+          "adjudication": {
+            "adjudication_id": "wadj_dawn_bell_001",
+            "input_type": "scheduled_world_event",
+            "input_ref": "sched_dawn_bell_001",
+            "input_sha256": "abd4e1343eff78ae490fc305343dd2a9a7a3755656653c8bd683f1bc4f330469",
+            "outcome_type": "success",
+            "outcome_summary": "The first dawn bell sounds and the archive begins opening on schedule.",
+            "applicable_rules": [
+              "The archive opens when the first dawn bell sounds."
+            ],
+            "constraint_basis": [
+              "The objective clock state is dawn_due.",
+              "The scheduled event authorizes only the bell and opening transition."
+            ],
+            "adjudication_basis": "The registered schedule trigger is satisfied, so only its bounded authorized effects are committed.",
+            "uncertainty_model": {
+              "mode": "deterministic",
+              "evidence_refs": [
+                "sched_dawn_bell_001",
+                "world_state_ledger.clock_state"
+              ],
+              "uncertainty_sources": []
+            },
+            "failed_alternatives": [],
+            "committed_events": [
+              {
+                "message_type": "CommittedWorldEvent",
+                "scene_id": "scene_archive_dawn_001",
+                "event_id": "ev_dawn_bell_001",
+                "source_input_type": "scheduled_world_event",
+                "source_input_ref": "sched_dawn_bell_001",
+                "event_kind": "institutional_clock_signal",
+                "actors": [],
+                "outcome": "The first dawn bell sounds; the archive begins opening.",
+                "public_surface": "The first dawn bell sounds and the archive doors begin to open.",
+                "visibility": {
+                  "scope": "scene_public",
+                  "scope_ref": "scene_archive_dawn_001",
+                  "observer_refs": [
+                    "char_lin"
+                  ],
+                  "limits": "surface_only_no_private_cause"
+                },
+                "authorized_interiority": [],
+                "spoken_line_records": [],
+                "causal_basis": [
+                  "sched_dawn_bell_001",
+                  "wadj_dawn_bell_001"
+                ],
+                "commit_status": "committed"
+              }
+            ],
+            "state_deltas": [
+              {
+                "delta_id": "sd_archive_opening_001",
+                "target_layer": "world_state_ledger",
+                "target_id": "archive_state",
+                "change_kind": "scheduled_transition",
+                "after_summary": "The archive is opening.",
+                "based_on": [
+                  "ev_dawn_bell_001"
+                ]
+              }
+            ],
+            "visibility_results": [
+              {
+                "visibility_result_id": "vr_dawn_bell_001",
+                "source_event_id": "ev_dawn_bell_001",
+                "scope": "scene_public",
+                "scope_ref": "scene_archive_dawn_001",
+                "observer_refs": [
+                  "char_lin"
+                ],
+                "limits": "surface_only_no_private_cause"
+              }
+            ],
+            "publication_candidates": [],
+            "canon_reveal_candidates": []
+          },
+          "plot_pulse_disposition": null,
+          "next_directive": {
+            "directive_type": "finish_scene",
+            "reason": "The bounded scheduled transition is complete.",
+            "decision_request": null
+          },
+          "checkpoint_state": {
+            "committed_beats": 1,
+            "dialogue_turns": 0
+          },
+          "authority_basis": [
+            "world_controls_registered_schedule_execution"
+          ],
+          "visibility": "system_restricted",
+          "based_on": [
+            "sched_dawn_bell_001"
+          ]
+        }
+      }
+    ],
+    "narrator": [
+      {
+        "prose": "黎明的第一声钟穿过档案馆，封闭整夜的门扉随之缓缓开启。"
+      }
+    ],
+    "authority": [
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_wadj_dawn_bell_001",
+          "subject_type": "world_adjudication",
+          "subject_ref": "wadj_dawn_bell_001",
+          "subject_sha256": "dfba41db7127e88f43165e19ce75ccdd0223b3b6e3a79b2e089c950bd9df64f1",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "registered schedule and state trigger are preserved"
+          ],
+          "reviewed_fields": [
+            "input_type",
+            "input_ref",
+            "input_sha256",
+            "outcome_type",
+            "outcome_summary",
+            "applicable_rules",
+            "constraint_basis",
+            "adjudication_basis",
+            "uncertainty_model",
+            "failed_alternatives",
+            "committed_events",
+            "state_deltas",
+            "visibility_results",
+            "publication_candidates",
+            "canon_reveal_candidates"
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_narration_dawn_001",
+          "subject_type": "narration",
+          "subject_ref": "ncp_world_driven_scheduled_bell_0",
+          "subject_sha256": "a73f09a494f42e03cb295c2ad7d05ea878d15791235c579ce9a917be3050a5af",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "prose remains inside the committed visible event"
+          ],
+          "reviewed_fields": [
+            "source_checkpoint_id",
+            "source_event_refs",
+            "prose",
+            "claim_units"
+          ],
+          "claim_map": [
+            {
+              "claim_id": "ncp_world_driven_scheduled_bell_0:claim:0",
+              "claim_sha256": "5503e14361e23965f109572dc5b5ab83a3a3b445d692de26e9eac6612ee6931f",
+              "claim_text": "黎明的第一声钟穿过档案馆，封闭整夜的门扉随之缓缓开启。",
+              "claim_type": "event",
+              "source_refs": [
+                "ev_dawn_bell_001"
+              ],
+              "certainty": "committed",
+              "visibility_scope": "scene_public",
+              "grounding_status": "supported"
+            }
+          ],
+          "visibility": "system_restricted"
+        }
+      }
+    ]
+  }
+}

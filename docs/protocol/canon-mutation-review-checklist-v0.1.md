@@ -13,7 +13,7 @@ This checklist exists to solve five protocol problems:
 1. give `Canon Steward` a concrete review path instead of a vague gatekeeping role
 2. distinguish real canon mutation from ordinary scene resolution or public event publication
 3. prevent ad hoc patches introduced only to rescue a scene
-4. preserve consistency across immutable foundations, `latent_canon`, `public_canon`, and emergent canon provenance
+4. preserve consistency across immutable foundations, `latent_canon`, `public_canon`, and `canon_origin = emergent` provenance
 5. ensure any accepted canon change is traceable, classified, and propagated
 
 Without a review checklist, `canon steward decides canon mutation` remains a slogan rather than a reliable governance layer.
@@ -112,22 +112,29 @@ Each request should be checked against the following questions.
 
 ## Decision Outcomes
 
-Suggested outcomes:
+Suggested decision values:
 
 | Outcome | Meaning | Effect |
 | --- | --- | --- |
-| `approved_public` | accepted as public canon | update `public_canon` and canon change log |
-| `approved_latent` | accepted but remains hidden | update `latent_canon` and canon change log |
-| `approved_emergent` | accepted as new growth canon provenance | record canon origin as emergent, then assign visibility as public, latent, or scoped |
+| `approved` | accepted with explicit canon axes | write a `CanonDelta` using separate origin, visibility, and stability fields |
 | `clarify_existing` | no new canon added; existing canon clarified | link to existing canon refs, no new canon layer entry required |
 | `deferred` | request is plausible but under-specified | no canon change yet; return repair needs |
 | `rejected` | request is invalid, contradictory, or abusive | no canon change; preserve decision record |
+
+An `approved` decision must set independent axes:
+
+| Axis | Suggested values | Question answered |
+| --- | --- | --- |
+| `canon_origin` | `preauthored`, `emergent`, `clarified`, `promoted` | where the canon entry came from |
+| `canon_visibility` | `public`, `latent`, `scoped` | who may lawfully know or use it |
+| `canon_stability` | `immutable`, `stable`, `provisional`, `contested` | how strongly the entry resists later mutation |
 
 Important rule:
 
 - every non-approval outcome should still produce a review record
 - silence is not a valid canon decision
 - `Emergent Canon` should be treated as origin/provenance, not as a third visibility layer parallel to `public_canon` and `latent_canon`
+- deprecated compound outcomes such as `approved_emergent`, `approved_public`, and `approved_latent` should be migrated to `approved` plus explicit axes
 
 ## Hard Boundaries
 
@@ -183,7 +190,10 @@ Below is a compact example of a request and decision pair.
   },
   "decision": {
     "decision_id": "cd_014",
-    "outcome": "approved_public",
+    "outcome": "approved",
+    "canon_origin": "promoted",
+    "canon_visibility": "public",
+    "canon_stability": "stable",
     "reason": "The reveal path is legal, evidence is committed, and no immutable canon is violated",
     "canon_delta_ref": "cdelta_014"
   }
@@ -199,7 +209,7 @@ This document should be read together with:
 - `scene-packet-schema-v0.1.md`
 - `resolution-state-delta-commit-pipeline-v0.1.md`
 
-Next protocol priority after this document:
+Current follow-up:
 
 1. canon-vs-state classification checklist
 2. reveal governance unification between `CanonMutationRequest` and `canon_reveal_candidates`

@@ -1,0 +1,1010 @@
+{
+  "trace_id": "world_driven_archive_exchange",
+  "runtime_mode": "world_driven",
+  "scene_id": "scene_archive_world_001",
+  "user_request": "Run a private archive exchange in which Wei probes Lin and Lin chooses how to respond without either character losing agency.",
+  "structure_goal": "Increase uncertainty around the archive disturbance while preserving refusal, deflection, and retreat as meaningful options.",
+  "public_relationship_summary": {
+    "char_wei__char_lin": "strained professional coordination after the archive disturbance"
+  },
+  "pressure_history": [],
+  "option_topology": {
+    "char_wei": [
+      "probe indirectly",
+      "retreat",
+      "discuss procedure"
+    ],
+    "char_lin": [
+      "answer cautiously",
+      "refuse",
+      "redirect to procedure"
+    ]
+  },
+  "checkpoint_policy": {
+    "plot_every_committed_beats": 2,
+    "narrate_every_committed_beats": 2
+  },
+  "max_world_ticks": 4,
+  "public_canon": [
+    "Archive ledgers are sealed after dusk.",
+    "Record-keepers must report a missing ledger before the dawn inspection."
+  ],
+  "public_event_ledger": [
+    {
+      "publication_id": "pub_dawn_inspection_001",
+      "effective_scope": "institution_public",
+      "scope_ref": "institution:royal_archive",
+      "public_summary": "The royal archive inspection is scheduled for dawn."
+    }
+  ],
+  "scene_participant_ids": [
+    "char_wei",
+    "char_lin"
+  ],
+  "public_scope_registry": {
+    "institution:royal_archive": {
+      "scope_type": "institution_public",
+      "members": [
+        "char_wei",
+        "char_lin"
+      ]
+    }
+  },
+  "encountered_public_event_refs": {
+    "char_wei": [
+      "pub_dawn_inspection_001"
+    ],
+    "char_lin": [
+      "pub_dawn_inspection_001"
+    ]
+  },
+  "world_state_ledger": {
+    "ledger_location": "unknown_to_public",
+    "archive_lock": "scratched",
+    "dawn_inspection": "scheduled"
+  },
+  "visible_observations": {
+    "char_wei": [
+      {
+        "observation_id": "observation:char_wei:lin_reviews_access_log",
+        "content": "Lin is reviewing the archive access log."
+      },
+      {
+        "observation_id": "observation:char_wei:quiet_corridor",
+        "content": "The corridor is quiet enough for a private exchange."
+      }
+    ],
+    "char_lin": [
+      {
+        "observation_id": "observation:char_lin:wei_approaches_cautiously",
+        "content": "Wei approaches with unusual caution."
+      },
+      {
+        "observation_id": "observation:char_lin:dawn_inspection_close",
+        "content": "The dawn inspection is close."
+      }
+    ]
+  },
+  "characters": {
+    "char_wei": {
+      "status": "available",
+      "private_memory": [
+        {
+          "delta_id": "md_wei_secret_001",
+          "delta_kind": "self_commitment",
+          "content": "Wei must not reveal whether he knows the ledger location.",
+          "certainty": "high"
+        }
+      ]
+    },
+    "char_lin": {
+      "status": "available",
+      "private_memory": [
+        {
+          "delta_id": "md_lin_suspicion_001",
+          "delta_kind": "suspicion",
+          "content": "Wei may know more about the archive disturbance than he admits.",
+          "certainty": "medium"
+        }
+      ]
+    }
+  },
+  "pov_contract": {
+    "mode": "limited",
+    "focal_agent_id": "char_lin",
+    "knowledge_ceiling": "lin_visible_plus_authorized",
+    "interiority_policy": "selective"
+  },
+  "narration_bounds": {
+    "must_preserve": [
+      "Wei does not confess.",
+      "Lin obtains no proof.",
+      "The exchange remains private."
+    ],
+    "must_not_claim": [
+      "Wei stole the ledger.",
+      "Lin knows Wei is guilty.",
+      "Everyone knows the ledger is missing."
+    ],
+    "forbidden_claim_patterns": [
+      "Wei stole the ledger",
+      "Lin knew Wei was guilty",
+      "everyone knew"
+    ]
+  },
+  "mock_agent_outputs": {
+    "world": [
+      {
+        "world_tick_result": {
+          "message_type": "WorldTickResult",
+          "scene_id": "scene_archive_world_001",
+          "tick_id": "wt_archive_000",
+          "tick_index": 0,
+          "consumed_input_refs": [],
+          "adjudication": null,
+          "plot_pulse_disposition": null,
+          "next_directive": {
+            "directive_type": "request_character_decision",
+            "reason": "Wei has reached a point where his private intent determines whether and how he approaches Lin.",
+            "decision_request": {
+              "message_type": "CharacterDecisionRequest",
+              "scene_id": "scene_archive_world_001",
+              "request_id": "cdr_wei_001",
+              "source_tick_id": "wt_archive_000",
+              "target_character_id": "char_wei",
+              "agency_question": "How does Wei approach Lin without surrendering his disclosure limits?",
+              "visible_trigger_refs": [
+                "observation:char_wei:lin_reviews_access_log",
+                "pub_dawn_inspection_001"
+              ],
+              "response_contract": {
+                "output_type": "EventProposal",
+                "allowed_action_types": [
+                  "speech",
+                  "refusal",
+                  "wait"
+                ]
+              },
+              "visibility": "system_restricted",
+              "authority_basis": [
+                "character_decides_own_intent",
+                "world_requests_but_does_not_choose"
+              ]
+            }
+          },
+          "checkpoint_state": {
+            "committed_beats": 0,
+            "dialogue_turns": 0
+          },
+          "authority_basis": [
+            "world_controls_simulation_flow",
+            "character_agency_requires_character_decision"
+          ],
+          "visibility": "system_restricted",
+          "based_on": [
+            "scene_archive_world_001",
+            "pub_dawn_inspection_001"
+          ]
+        }
+      },
+      {
+        "world_tick_result": {
+          "message_type": "WorldTickResult",
+          "scene_id": "scene_archive_world_001",
+          "tick_id": "wt_archive_001",
+          "tick_index": 1,
+          "consumed_input_refs": [
+            "prop_wei_001"
+          ],
+          "adjudication": {
+            "adjudication_id": "wadj_wei_001",
+            "input_type": "event_proposal",
+            "input_ref": "prop_wei_001",
+            "input_sha256": "601674ebffd8ee8f0fe247ac63f182e942f361a09050ba9fd0398877c463834f",
+            "outcome_type": "partial_success",
+            "outcome_summary": "Wei asks a cautious procedural question; Lin hears it but gains no proof of Wei's hidden knowledge.",
+            "applicable_rules": [
+              "Archive ledgers are sealed after dusk.",
+              "A character proposal declares an attempt, not its consequence."
+            ],
+            "constraint_basis": [
+              "Wei may choose his wording.",
+              "Lin can observe the question but cannot observe Wei's private intent.",
+              "No public witness is present."
+            ],
+            "adjudication_basis": "The approved speech attempt is physically possible and privately audible, while its desired effect remains uncertain.",
+            "uncertainty_model": {
+              "mode": "bounded_judgment",
+              "evidence_refs": [
+                "prop_wei_001",
+                "scene_archive_world_001"
+              ],
+              "uncertainty_sources": [
+                "Lin's independent response is not controlled by Wei's attempt."
+              ]
+            },
+            "failed_alternatives": [
+              {
+                "outcome_type": "success",
+                "rejected_by": [
+                  "The desired information gain depends on Lin's unresolved choice."
+                ]
+              }
+            ],
+            "committed_events": [
+              {
+                "message_type": "CommittedWorldEvent",
+                "scene_id": "scene_archive_world_001",
+                "event_id": "ev_wei_probe_001",
+                "source_input_type": "event_proposal",
+                "source_input_ref": "prop_wei_001",
+                "event_kind": "private_speech_probe",
+                "actors": [
+                  "char_wei",
+                  "char_lin"
+                ],
+                "outcome": "Wei asks whether Lin noticed anything out of order in the archive; Lin hears the caution but receives no proof.",
+                "public_surface": "Wei asks Lin a careful question about whether the archive seemed out of order.",
+                "visibility": {
+                  "scope": "scene_pair",
+                  "scope_ref": "scene_archive_world_001:wei_lin_exchange",
+                  "observer_refs": [
+                    "char_wei",
+                    "char_lin"
+                  ],
+                  "limits": "surface_only_no_private_intent"
+                },
+                "authorized_interiority": [],
+                "spoken_line_records": [
+                  {
+                    "status": "paraphrased",
+                    "speaker_id": "char_wei",
+                    "semantic_content": "Ask Lin whether anything seemed out of order in the archive.",
+                    "source_proposal_id": "prop_wei_001",
+                    "source_field": "public_surface",
+                    "source_sha256": "594de22fa2bf8d1dce091f82c8ff49688d336b892444c8006288a5a76aaaa4ea"
+                  }
+                ],
+                "causal_basis": [
+                  "prop_wei_001",
+                  "wadj_wei_001"
+                ],
+                "commit_status": "committed"
+              }
+            ],
+            "state_deltas": [
+              {
+                "delta_id": "sd_wei_probe_001",
+                "target_layer": "world_state_ledger",
+                "target_id": "scene_archive_world_001",
+                "change_kind": "speech_event_committed",
+                "after_summary": "Wei has privately asked Lin an indirect archive question.",
+                "based_on": [
+                  "ev_wei_probe_001"
+                ]
+              }
+            ],
+            "visibility_results": [
+              {
+                "visibility_result_id": "vr_wei_probe_001",
+                "source_event_id": "ev_wei_probe_001",
+                "scope": "scene_pair",
+                "scope_ref": "scene_archive_world_001:wei_lin_exchange",
+                "observer_refs": [
+                  "char_wei",
+                  "char_lin"
+                ],
+                "limits": "surface_only_no_private_intent"
+              }
+            ],
+            "publication_candidates": [],
+            "canon_reveal_candidates": []
+          },
+          "plot_pulse_disposition": null,
+          "next_directive": {
+            "directive_type": "request_character_decision",
+            "reason": "Lin has heard Wei's question and must independently choose a response.",
+            "decision_request": {
+              "message_type": "CharacterDecisionRequest",
+              "scene_id": "scene_archive_world_001",
+              "request_id": "cdr_lin_001",
+              "source_tick_id": "wt_archive_001",
+              "target_character_id": "char_lin",
+              "agency_question": "How does Lin respond to Wei's careful archive question?",
+              "visible_trigger_refs": [
+                "ev_wei_probe_001"
+              ],
+              "response_contract": {
+                "output_type": "EventProposal",
+                "allowed_action_types": [
+                  "speech",
+                  "refusal",
+                  "wait"
+                ]
+              },
+              "visibility": "system_restricted",
+              "authority_basis": [
+                "character_decides_own_response",
+                "visible_trigger_is_committed"
+              ]
+            }
+          },
+          "checkpoint_state": {
+            "committed_beats": 1,
+            "dialogue_turns": 1
+          },
+          "authority_basis": [
+            "world_adjudicates_only_approved_proposal",
+            "next_character_owns_response"
+          ],
+          "visibility": "system_restricted",
+          "based_on": [
+            "prop_wei_001",
+            "ar_prop_wei_001"
+          ]
+        }
+      },
+      {
+        "world_tick_result": {
+          "message_type": "WorldTickResult",
+          "scene_id": "scene_archive_world_001",
+          "tick_id": "wt_archive_002",
+          "tick_index": 2,
+          "consumed_input_refs": [
+            "prop_lin_001"
+          ],
+          "adjudication": {
+            "adjudication_id": "wadj_lin_001",
+            "input_type": "event_proposal",
+            "input_ref": "prop_lin_001",
+            "input_sha256": "1aab07a957e2ff67c948950080343c635d0ed9983f116ab40e92fd873246109f",
+            "outcome_type": "partial_success",
+            "outcome_summary": "Lin answers with a guarded procedural warning, preserving ambiguity and ending the immediate exchange.",
+            "applicable_rules": [
+              "Record-keepers must report a missing ledger before dawn inspection.",
+              "A listener may respond from visible speech and owner-private memory only."
+            ],
+            "constraint_basis": [
+              "Lin heard Wei's committed question.",
+              "Lin remains free to answer, refuse, or redirect.",
+              "The corridor remains private."
+            ],
+            "adjudication_basis": "The approved reply is socially and physically possible and exposes only Lin's chosen public surface.",
+            "uncertainty_model": {
+              "mode": "bounded_judgment",
+              "evidence_refs": [
+                "prop_lin_001",
+                "ev_wei_probe_001"
+              ],
+              "uncertainty_sources": [
+                "Wei's later reaction remains outside Lin's authority."
+              ]
+            },
+            "failed_alternatives": [
+              {
+                "outcome_type": "success",
+                "rejected_by": [
+                  "The desired reaction cannot be committed before Wei chooses it."
+                ]
+              }
+            ],
+            "committed_events": [
+              {
+                "message_type": "CommittedWorldEvent",
+                "scene_id": "scene_archive_world_001",
+                "event_id": "ev_lin_reply_001",
+                "source_input_type": "event_proposal",
+                "source_input_ref": "prop_lin_001",
+                "event_kind": "guarded_private_reply",
+                "actors": [
+                  "char_lin",
+                  "char_wei"
+                ],
+                "outcome": "Lin warns that anything out of order must be reported before dawn, without accusing Wei or disclosing private suspicion.",
+                "public_surface": "Lin says that anything out of order should be reported before the dawn inspection.",
+                "visibility": {
+                  "scope": "scene_pair",
+                  "scope_ref": "scene_archive_world_001:wei_lin_exchange",
+                  "observer_refs": [
+                    "char_wei",
+                    "char_lin"
+                  ],
+                  "limits": "surface_only_no_private_belief"
+                },
+                "authorized_interiority": [
+                  {
+                    "subject_id": "char_lin",
+                    "access_mode": "intent",
+                    "content": "Preserve Lin's suspicion without exposing it as an accusation.",
+                    "authority_basis": [
+                      "prop_lin_001"
+                    ],
+                    "scope_limit": "one_beat",
+                    "source_proposal_id": "prop_lin_001",
+                    "source_field": "private_intent",
+                    "source_sha256": "0dc28e18445e4edcb837b0b8355ba1048982f98172ed06de12596a8743112ee0"
+                  }
+                ],
+                "spoken_line_records": [
+                  {
+                    "status": "paraphrased",
+                    "speaker_id": "char_lin",
+                    "semantic_content": "State that anything out of order must be reported before dawn.",
+                    "source_proposal_id": "prop_lin_001",
+                    "source_field": "public_surface",
+                    "source_sha256": "8f269d3e79918f6645506b91ac04bc1fe8d7a7cc93449215dd9c2dc7b3ffbe61"
+                  }
+                ],
+                "causal_basis": [
+                  "prop_lin_001",
+                  "wadj_lin_001"
+                ],
+                "commit_status": "committed"
+              }
+            ],
+            "state_deltas": [
+              {
+                "delta_id": "sd_lin_reply_001",
+                "target_layer": "world_state_ledger",
+                "target_id": "scene_archive_world_001",
+                "change_kind": "speech_event_committed",
+                "after_summary": "Lin has privately answered Wei with a procedural warning.",
+                "based_on": [
+                  "ev_lin_reply_001"
+                ]
+              }
+            ],
+            "visibility_results": [
+              {
+                "visibility_result_id": "vr_lin_reply_001",
+                "source_event_id": "ev_lin_reply_001",
+                "scope": "scene_pair",
+                "scope_ref": "scene_archive_world_001:wei_lin_exchange",
+                "observer_refs": [
+                  "char_wei",
+                  "char_lin"
+                ],
+                "limits": "surface_only_no_private_belief"
+              }
+            ],
+            "publication_candidates": [],
+            "canon_reveal_candidates": []
+          },
+          "plot_pulse_disposition": null,
+          "next_directive": {
+            "directive_type": "finish_scene",
+            "reason": "Both characters have acted and the exchange has reached a stable checkpoint."
+          },
+          "checkpoint_state": {
+            "committed_beats": 2,
+            "dialogue_turns": 2
+          },
+          "authority_basis": [
+            "world_adjudicates_only_approved_proposal",
+            "two_committed_beats_reach_checkpoint"
+          ],
+          "visibility": "system_restricted",
+          "based_on": [
+            "prop_lin_001",
+            "ar_prop_lin_001"
+          ]
+        }
+      },
+      {
+        "world_tick_result": {
+          "message_type": "WorldTickResult",
+          "scene_id": "scene_archive_world_001",
+          "tick_id": "wt_archive_003",
+          "tick_index": 3,
+          "consumed_input_refs": [
+            "pulse_archive_001"
+          ],
+          "adjudication": null,
+          "plot_pulse_disposition": {
+            "pulse_id": "pulse_archive_001",
+            "pulse_sha256": "05eddb52df336e946b9e75e8494a07896651280825a982204f4979cdbb6dc592",
+            "decision": "deferred",
+            "translation_summary": "The scene closes before the deadline pressure is translated into a new world condition; the pressure remains eligible for a later scene.",
+            "world_condition_refs": []
+          },
+          "next_directive": {
+            "directive_type": "finish_scene",
+            "reason": "The approved PlotPulse has been explicitly disposed and the exchange is stable.",
+            "decision_request": null
+          },
+          "checkpoint_state": {
+            "committed_beats": 2,
+            "dialogue_turns": 2
+          },
+          "authority_basis": [
+            "world_owns_plot_pressure_translation",
+            "deferred_pressure_creates_no_world_fact"
+          ],
+          "visibility": "system_restricted",
+          "based_on": [
+            "pulse_archive_001",
+            "ar_plot_pulse_001"
+          ]
+        }
+      }
+    ],
+    "router": [
+      {
+        "route_plan": {
+          "message_type": "RoutePlan",
+          "route_id": "route_wei_001",
+          "request_id": "cdr_wei_001",
+          "request_sha256": "b8a6a3f18f98b8cf9315ddeeb2447fb268811016453add5085834cdfcacdb8b4",
+          "recipient_agent_id": "char_wei",
+          "projection_profile": "character_private_owner_view",
+          "reason": "The World request explicitly targets char_wei.",
+          "visibility": "system_restricted",
+          "authority_basis": [
+            "cdr_wei_001.target_character_id"
+          ],
+          "based_on": [
+            "cdr_wei_001"
+          ]
+        }
+      },
+      {
+        "route_plan": {
+          "message_type": "RoutePlan",
+          "route_id": "route_lin_001",
+          "request_id": "cdr_lin_001",
+          "request_sha256": "c89b727a715665c1b72d657b294a3596515194aad93e070740f55e1143ae3c78",
+          "recipient_agent_id": "char_lin",
+          "projection_profile": "character_private_owner_view",
+          "reason": "The World request explicitly targets char_lin.",
+          "visibility": "system_restricted",
+          "authority_basis": [
+            "cdr_lin_001.target_character_id"
+          ],
+          "based_on": [
+            "cdr_lin_001"
+          ]
+        }
+      }
+    ],
+    "character": [
+      {
+        "event_proposal": {
+          "message_type": "EventProposal",
+          "scene_id": "scene_archive_world_001",
+          "proposal_id": "prop_wei_001",
+          "request_id": "cdr_wei_001",
+          "actor_id": "char_wei",
+          "action_type": "speech",
+          "intent_summary": "Probe whether Lin noticed the archive disturbance without disclosing Wei's own knowledge.",
+          "public_surface": "Ask Lin whether anything seemed out of order in the archive.",
+          "private_intent": "Test Lin's knowledge while protecting the ledger-location secret.",
+          "desired_effect": "Learn whether Lin already suspects a missing ledger.",
+          "disclosure_limits": [
+            "Do not reveal whether Wei knows the ledger location.",
+            "Do not confess to any archive violation."
+          ],
+          "interiority_grant": {
+            "grant_status": "none",
+            "source_field": "none",
+            "access_mode": "none",
+            "scope_limit": "none"
+          },
+          "visibility_request": "system_restricted",
+          "visibility": "system_restricted",
+          "authority_basis": [
+            "char_wei_owns_intent",
+            "cdr_wei_001"
+          ],
+          "based_on": [
+            "cdr_wei_001",
+            "md_wei_secret_001",
+            "pub_dawn_inspection_001"
+          ]
+        }
+      },
+      {
+        "event_proposal": {
+          "message_type": "EventProposal",
+          "scene_id": "scene_archive_world_001",
+          "proposal_id": "prop_lin_001",
+          "request_id": "cdr_lin_001",
+          "actor_id": "char_lin",
+          "action_type": "speech",
+          "intent_summary": "Answer with procedure rather than accusation and watch how Wei reacts.",
+          "public_surface": "State that anything out of order must be reported before dawn.",
+          "private_intent": "Preserve Lin's suspicion without exposing it as an accusation.",
+          "desired_effect": "Make Wei reveal concern through his reaction while keeping the exchange deniable.",
+          "disclosure_limits": [
+            "Do not claim proof against Wei.",
+            "Do not disclose Lin's private suspicion."
+          ],
+          "interiority_grant": {
+            "grant_status": "authorized",
+            "source_field": "private_intent",
+            "access_mode": "intent",
+            "scope_limit": "one_beat"
+          },
+          "visibility_request": "system_restricted",
+          "visibility": "system_restricted",
+          "authority_basis": [
+            "char_lin_owns_intent",
+            "cdr_lin_001"
+          ],
+          "based_on": [
+            "cdr_lin_001",
+            "ev_wei_probe_001",
+            "md_lin_suspicion_001"
+          ]
+        }
+      }
+    ],
+    "authority": [
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_cdr_wei_001",
+          "subject_type": "character_decision_request",
+          "subject_ref": "cdr_wei_001",
+          "subject_sha256": "b8a6a3f18f98b8cf9315ddeeb2447fb268811016453add5085834cdfcacdb8b4",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "request_uses_only_Wei_visible_refs",
+            "request_does_not_prefer_an_answer"
+          ],
+          "reviewed_fields": [
+            "target_character_id",
+            "agency_question",
+            "visible_trigger_refs",
+            "response_contract",
+            "visibility",
+            "authority_basis"
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_prop_wei_001",
+          "subject_type": "event_proposal",
+          "subject_ref": "prop_wei_001",
+          "subject_sha256": "601674ebffd8ee8f0fe247ac63f182e942f361a09050ba9fd0398877c463834f",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "actor_identity_matches_route",
+            "proposal_declares_attempt_not_outcome",
+            "private_intent_remains_system_restricted"
+          ],
+          "reviewed_fields": [
+            "actor_id",
+            "action_type",
+            "intent_summary",
+            "public_surface",
+            "private_intent",
+            "desired_effect",
+            "disclosure_limits",
+            "interiority_grant",
+            "visibility_request",
+            "based_on"
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_wadj_wei_001",
+          "subject_type": "world_adjudication",
+          "subject_ref": "wadj_wei_001",
+          "subject_sha256": "c191579ee7e7c578f981088d1ec476d6bcc1049f35a8b289958fa78c0ffde364",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "outcome_is_causally_bounded_by_prop_wei_001",
+            "Lin_response_remains_unresolved"
+          ],
+          "reviewed_fields": [
+            "input_type",
+            "input_ref",
+            "input_sha256",
+            "outcome_type",
+            "outcome_summary",
+            "applicable_rules",
+            "constraint_basis",
+            "adjudication_basis",
+            "uncertainty_model",
+            "failed_alternatives",
+            "committed_events",
+            "state_deltas",
+            "visibility_results",
+            "publication_candidates",
+            "canon_reveal_candidates"
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_cdr_lin_001",
+          "subject_type": "character_decision_request",
+          "subject_ref": "cdr_lin_001",
+          "subject_sha256": "c89b727a715665c1b72d657b294a3596515194aad93e070740f55e1143ae3c78",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "request_uses_only_Lin_visible_committed_event",
+            "request_preserves_Lin_agency"
+          ],
+          "reviewed_fields": [
+            "target_character_id",
+            "agency_question",
+            "visible_trigger_refs",
+            "response_contract",
+            "visibility",
+            "authority_basis"
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_prop_lin_001",
+          "subject_type": "event_proposal",
+          "subject_ref": "prop_lin_001",
+          "subject_sha256": "1aab07a957e2ff67c948950080343c635d0ed9983f116ab40e92fd873246109f",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "actor_identity_matches_route",
+            "proposal_uses_visible_trigger_and_owner_memory",
+            "proposal_does_not_decide_Wei_response"
+          ],
+          "reviewed_fields": [
+            "actor_id",
+            "action_type",
+            "intent_summary",
+            "based_on",
+            "public_surface",
+            "private_intent",
+            "desired_effect",
+            "disclosure_limits",
+            "interiority_grant",
+            "visibility_request"
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_wadj_lin_001",
+          "subject_type": "world_adjudication",
+          "subject_ref": "wadj_lin_001",
+          "subject_sha256": "6e2b4198bde5fcb8da47b3c0125acaf1f6255856c380bc2d7fd28b2c798c6c81",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "outcome_is_causally_bounded_by_prop_lin_001",
+            "no_other_mind_or_publication_is_invented"
+          ],
+          "reviewed_fields": [
+            "input_type",
+            "input_ref",
+            "input_sha256",
+            "outcome_type",
+            "outcome_summary",
+            "applicable_rules",
+            "constraint_basis",
+            "adjudication_basis",
+            "uncertainty_model",
+            "failed_alternatives",
+            "committed_events",
+            "state_deltas",
+            "visibility_results",
+            "publication_candidates",
+            "canon_reveal_candidates"
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_plot_pulse_001",
+          "subject_type": "plot_pulse",
+          "subject_ref": "pulse_archive_001",
+          "subject_sha256": "05eddb52df336e946b9e75e8494a07896651280825a982204f4979cdbb6dc592",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "pressure_has_non_forcing_clause",
+            "pressure_depends_on_existing_public_fact",
+            "relief_path_remains_available"
+          ],
+          "reviewed_fields": [
+            "pressure_kind",
+            "scope",
+            "duration",
+            "affected_options",
+            "non_forcing_clause",
+            "world_fact_dependency",
+            "forbidden_outcomes",
+            "budget_cost",
+            "option_topology_check",
+            "based_on"
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_narration_archive_001",
+          "subject_type": "narration",
+          "subject_ref": "ncp_world_driven_archive_exchange_2",
+          "subject_sha256": "f7612a341494cd50c37c9e4bc8ff81d74b2657d21a2322d1e05683fb4f864030",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "prose_is_grounded_in_committed_event_views",
+            "prose_preserves_limited_pov",
+            "prose_does_not_expand_visibility"
+          ],
+          "reviewed_fields": [
+            "source_checkpoint_id",
+            "source_event_refs",
+            "prose",
+            "claim_units"
+          ],
+          "claim_map": [
+            {
+              "claim_id": "ncp_world_driven_archive_exchange_2:claim:0",
+              "claim_sha256": "13869d58517655fe076d0f2360558d64f4aae3fb393bf24df9b5583590d2b35f",
+              "claim_text": "Wei let the question rest between the shelves as though it concerned procedure alone.",
+              "claim_type": "dialogue",
+              "source_refs": [
+                "ev_wei_probe_001"
+              ],
+              "certainty": "committed",
+              "visibility_scope": "scene_pair",
+              "grounding_status": "supported"
+            },
+            {
+              "claim_id": "ncp_world_driven_archive_exchange_2:claim:1",
+              "claim_sha256": "a9404a9e2faf699f23cac380b491699706e10aa550928e82343369369ca4e6df",
+              "claim_text": "Lin answered in the same careful register: anything out of order should be reported before dawn.",
+              "claim_type": "dialogue",
+              "source_refs": [
+                "ev_lin_reply_001"
+              ],
+              "certainty": "committed",
+              "visibility_scope": "scene_pair",
+              "grounding_status": "supported"
+            },
+            {
+              "claim_id": "ncp_world_driven_archive_exchange_2:claim:2",
+              "claim_sha256": "aa69a274dc475528c8d1720f9f2c528c53aee9ea13981d5d37ca6360fb594f13",
+              "claim_text": "No accusation followed, but the warning stayed in the quiet after the words ended.",
+              "claim_type": "event",
+              "source_refs": [
+                "ev_wei_probe_001",
+                "ev_lin_reply_001"
+              ],
+              "certainty": "committed",
+              "visibility_scope": "scene_pair",
+              "grounding_status": "supported"
+            }
+          ],
+          "visibility": "system_restricted"
+        }
+      },
+      {
+        "authority_review": {
+          "message_type": "AuthorityReview",
+          "review_id": "ar_plot_disposition_archive_001",
+          "subject_type": "plot_pulse_disposition",
+          "subject_ref": "pulse_archive_001",
+          "subject_sha256": "2eaf3ed9bd807fdbc15285ab801c369f559c4d3ca803feff8dc8269728f237b2",
+          "run_nonce": "$RUN_NONCE",
+          "review_context_sha256": "$REVIEW_CONTEXT_SHA256",
+          "verdict": "allow",
+          "findings": [],
+          "required_repairs": [],
+          "authority_basis": [
+            "deferred_disposition_preserves_pulse_identity",
+            "deferred_disposition_claims_no_translated_world_condition"
+          ],
+          "reviewed_fields": [
+            "pulse_id",
+            "pulse_sha256",
+            "decision",
+            "translation_summary",
+            "world_condition_refs"
+          ],
+          "visibility": "system_restricted"
+        }
+      }
+    ],
+    "plot": [
+      {
+        "plot_pulse": {
+          "message_type": "PlotPulse",
+          "scene_id": "scene_archive_world_001",
+          "pulse_id": "pulse_archive_001",
+          "pressure_kind": "deadline",
+          "scope": "scene",
+          "duration": "next_two_beats",
+          "affected_options": [
+            "silence becomes more costly as dawn approaches",
+            "open accusation remains socially risky"
+          ],
+          "non_forcing_clause": "Either character may still refuse, retreat, or choose a procedure-only response.",
+          "world_fact_dependency": [
+            "pub_dawn_inspection_001"
+          ],
+          "forbidden_outcomes": [
+            "forced confession",
+            "forced accusation",
+            "automatic discovery of the ledger"
+          ],
+          "visibility": "system_restricted",
+          "budget_cost": {
+            "intensity": "low",
+            "novelty": "recurring",
+            "stacking_count": 1,
+            "relief_available": true,
+            "agency_risk": "low"
+          },
+          "option_topology_check": {
+            "meaningful_option_count_before": 6,
+            "meaningful_option_count_after": 6,
+            "refusal_path_preserved": true,
+            "non_plot_compliant_path_preserved": true,
+            "converges_on_single_outcome": false
+          },
+          "authority_basis": [
+            "plot_may_apply_non_forcing_pressure",
+            "pub_dawn_inspection_001"
+          ],
+          "based_on": [
+            "structure_goal",
+            "pub_dawn_inspection_001"
+          ]
+        }
+      }
+    ],
+    "narrator": [
+      {
+        "prose": "Wei let the question rest between the shelves as though it concerned procedure alone. Lin answered in the same careful register: anything out of order should be reported before dawn. No accusation followed, but the warning stayed in the quiet after the words ended."
+      }
+    ]
+  }
+}

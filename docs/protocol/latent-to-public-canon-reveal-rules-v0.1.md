@@ -234,8 +234,8 @@ This document should be read together with:
 - `scene-packet-schema-v0.1.md`
 - `resolution-state-delta-commit-pipeline-v0.1.md`
 
-Next protocol priority after this document:
+Current executable status:
 
-1. canon-vs-state classification checklist
-2. public scope registry and audience membership model
-3. adversarial trace fixtures for partial reveal and narrator leakage
+1. reveal candidates remain system-restricted and are excluded from Character, Plot, and Narrator projections
+2. candidate leakage and Narrator hidden-fact leakage are covered by adversarial tests
+3. remaining work is the canon-vs-state classification checklist, live Canon Steward promotion, and multi-scene reveal propagation

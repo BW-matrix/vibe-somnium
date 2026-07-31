@@ -10,7 +10,7 @@ from .runner import run_trace
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Run a2a-literary-agents single-window traces.")
+    parser = argparse.ArgumentParser(description="Run legacy or World-driven a2a-literary-agents traces.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     run_parser = subparsers.add_parser("run", help="Run one trace fixture.")

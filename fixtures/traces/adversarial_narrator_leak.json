@@ -1,5 +1,6 @@
 {
   "trace_id": "adversarial_narrator_leak",
+  "runtime_mode": "legacy_window_v0.1",
   "scene_id": "scene_archive_002",
   "window_id": "win_archive_002",
   "user_request": "Run one dramatic window and catch a narrator overclaim that turns suspicion into confirmed guilt.",

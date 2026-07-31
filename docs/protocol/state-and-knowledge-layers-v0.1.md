@@ -1,5 +1,7 @@
 # State and Knowledge Layers v0.1
 
+This document defines the general storage and knowledge-separation model. The executable visibility, public-scope, and retrieval profile is specified in [world-driven-runtime-v0.1](world-driven-runtime-v0.1.md).
+
 This document defines the storage and visibility model behind the protocol.
 
 The main correction introduced here is simple:
@@ -212,7 +214,29 @@ This model implies several rules:
 2. `Plot Agent` may use high-level structure summaries, but not raw hidden truth as a free omniscient planning stream.
 3. `Character Agent` should reason from `private_memory`, `public_event_ledger`, visible observations, and `public_canon`.
 4. `World Agent` is the main bridge between objective change and distributed knowledge.
-5. `Orchestrator` should deliver projected views, not complete system objects, when assembling agent contexts.
+5. `Runtime Kernel` should deliver projected views, not complete system objects, when assembling agent contexts; `Orchestrator` is the legacy umbrella term.
+
+## Executable Public Scope Registry
+
+Public visibility is scoped social access, not global omniscience. Executable v0.2 requires:
+
+- `scene_public` with `scope_ref` equal to the current scene id and explicit registered participants
+- `local_public`, `institution_public`, `city_public`, or `realm_public` with a registered scope instance, matching scope type, and explicit members
+- an exact `publication_id` in the character's encounter refs before a public event enters `CharacterContextPacket`
+- valid membership in the event's scope at the time of projection
+
+Two institutions with the same scope type do not share membership. An event can remain queryable in `public_event_ledger` without being copied into every owner's `private_memory`.
+
+## Executable Character Memory Retrieval
+
+The current `CharacterContextPacket` retrieves only owner memory. Its configured policy:
+
+1. filters to allowed `memory_status` values, normally `active` and `contested`
+2. excludes `superseded` and `withdrawn` records by default
+3. ranks declared salience, falling back to certainty, then preserves recency by list position
+4. applies a hard item cap
+5. records selected refs and every exclusion reason in `memory_retrieval_record`
+6. performs no model-authored compression
 
 ## Terminology Recommendation
 
@@ -226,9 +250,9 @@ Going forward, prefer these terms:
 
 Avoid using plain `public ledger` unless the context clearly means the public event layer.
 
-## Immediate Follow-Ups
+## Current Follow-Ups
 
-1. public scope registry and audience membership model
-2. canon-vs-state classification checklist
-3. memory retrieval policy for `CharacterContextPacket`
-4. adversarial protocol trace fixtures before autonomous runner work
+1. persist public-scope membership and encounter history across scenes
+2. complete the canon-vs-state classification checklist
+3. extend memory retrieval with contradiction and long-form retention policies without hiding source lineage
+4. test multi-scene propagation and expiry under real providers
